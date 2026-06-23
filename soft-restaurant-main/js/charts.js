@@ -5,24 +5,24 @@
  */
 
 // ── CONFIGURACIÓN GLOBAL ─────────────────────────────────────
-Chart.defaults.color = '#4b5980';
-Chart.defaults.borderColor = 'rgba(99,102,241,.1)';
+Chart.defaults.color = '#64748b';
+Chart.defaults.borderColor = 'rgba(0,0,0,.06)';
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.plugins.legend.display = false;
-Chart.defaults.plugins.tooltip.backgroundColor = '#0c1632';
-Chart.defaults.plugins.tooltip.borderColor = 'rgba(99,102,241,.25)';
+Chart.defaults.plugins.tooltip.backgroundColor = '#ffffff';
+Chart.defaults.plugins.tooltip.borderColor = '#e2e8f0';
 Chart.defaults.plugins.tooltip.borderWidth = 1;
 Chart.defaults.plugins.tooltip.padding = 12;
 Chart.defaults.plugins.tooltip.cornerRadius = 10;
-Chart.defaults.plugins.tooltip.titleColor = '#f1f5f9';
-Chart.defaults.plugins.tooltip.bodyColor = '#94a3b8';
+Chart.defaults.plugins.tooltip.titleColor = '#0f172a';
+Chart.defaults.plugins.tooltip.bodyColor = '#475569';
 
-const ACCENT  = '#6366f1';
-const SUCCESS = '#10b981';
-const INFO    = '#0ea5e9';
-const WARNING = '#f59e0b';
-const PURPLE  = '#a855f7';
-const MUTED   = '#4b5980';
+const ACCENT  = '#f97316';
+const SUCCESS = '#16a34a';
+const INFO    = '#0284c7';
+const WARNING = '#d97706';
+const PURPLE  = '#9333ea';
+const MUTED   = '#94a3b8';
 
 const charts = {};
 
@@ -42,11 +42,11 @@ function initVentasHoraChart() {
           data: d.hoy,
           backgroundColor: d.hoy.map((v, i) =>
             i === d.hoy.length - 1
-              ? 'rgba(99,102,241,.2)'
-              : `rgba(99,102,241,${0.35 + (v / Math.max(...d.hoy)) * 0.55})`
+              ? 'rgba(249,115,22,.2)'
+              : `rgba(249,115,22,${0.35 + (v / Math.max(...d.hoy)) * 0.55})`
           ),
           borderColor: d.hoy.map((v, i) =>
-            i === d.hoy.length - 1 ? 'rgba(99,102,241,.35)' : ACCENT
+            i === d.hoy.length - 1 ? 'rgba(249,115,22,.35)' : ACCENT
           ),
           borderWidth: 1.5,
           borderRadius: 6,
@@ -55,8 +55,8 @@ function initVentasHoraChart() {
         {
           label: 'Ayer',
           data: d.ayer,
-          backgroundColor: 'rgba(148,163,184,.06)',
-          borderColor: 'rgba(148,163,184,.2)',
+          backgroundColor: 'rgba(148,163,184,.1)',
+          borderColor: 'rgba(148,163,184,.3)',
           borderWidth: 1,
           borderRadius: 6,
           borderSkipped: false,
@@ -66,7 +66,7 @@ function initVentasHoraChart() {
           label: 'Meta',
           data: d.meta,
           type: 'line',
-          borderColor: 'rgba(245,158,11,.5)',
+          borderColor: 'rgba(217,119,6,.5)',
           borderWidth: 1.5,
           borderDash: [4, 4],
           pointRadius: 0,
@@ -92,7 +92,7 @@ function initVentasHoraChart() {
           ticks: { font: { size: 11, family: "'JetBrains Mono', monospace" } }
         },
         y: {
-          grid: { color: 'rgba(99,102,241,.07)', lineWidth: 1 },
+          grid: { color: 'rgba(0,0,0,.04)', lineWidth: 1 },
           ticks: {
             font: { size: 11, family: "'JetBrains Mono', monospace" },
             callback: v => `$${(v/1000).toFixed(0)}k`
@@ -111,8 +111,8 @@ function initVentasSemanaChart() {
   const d = RestaurantData.ventasSemana;
 
   const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, 'rgba(99,102,241,.35)');
-  gradient.addColorStop(1, 'rgba(99,102,241,0)');
+  gradient.addColorStop(0, 'rgba(249,115,22,.25)');
+  gradient.addColorStop(1, 'rgba(249,115,22,0)');
 
   charts.ventasSemana = new Chart(ctx, {
     type: 'line',
@@ -130,13 +130,13 @@ function initVentasSemanaChart() {
           pointBackgroundColor: ACCENT,
           pointRadius: 4,
           pointHoverRadius: 7,
-          pointBorderColor: '#05091a',
+          pointBorderColor: '#ffffff',
           pointBorderWidth: 2,
         },
         {
           label: 'Semana anterior',
           data: d.semanaAnterior,
-          borderColor: 'rgba(148,163,184,.3)',
+          borderColor: 'rgba(148,163,184,.4)',
           borderWidth: 1.5,
           borderDash: [4,4],
           fill: false,
@@ -163,7 +163,7 @@ function initVentasSemanaChart() {
           ticks: { font: { size: 11 } }
         },
         y: {
-          grid: { color: 'rgba(99,102,241,.07)' },
+          grid: { color: 'rgba(0,0,0,.04)' },
           ticks: {
             font: { size: 11, family: "'JetBrains Mono', monospace" },
             callback: v => `$${(v/1000).toFixed(0)}k`
@@ -188,10 +188,10 @@ function initCategoryDonut() {
       datasets: [{
         data: d.map(c => c.valor),
         backgroundColor: d.map(c => c.color),
-        borderColor: '#0c1632',
+        borderColor: '#ffffff',
         borderWidth: 3,
         hoverOffset: 8,
-        hoverBorderColor: '#112040',
+        hoverBorderColor: '#f8fafc',
       }]
     },
     options: {
@@ -210,7 +210,7 @@ function initCategoryDonut() {
 }
 
 // ── MINI SPARKLINES SVG ──────────────────────────────────────
-function renderSparkline(containerId, data, color = '#6366f1') {
+function renderSparkline(containerId, data, color = '#f97316') {
   const el = document.getElementById(containerId);
   if (!el) return;
 
@@ -241,12 +241,12 @@ function renderSparkline(containerId, data, color = '#6366f1') {
       <path class="sparkline-area" d="${areaD}" fill="url(#sg_${containerId})"/>
       <path class="sparkline-path" d="${pathD}" stroke="${color}"/>
       <circle cx="${points[points.length-1].split(',')[0]}" cy="${points[points.length-1].split(',')[1]}"
-              r="2.5" fill="${color}" stroke="#0c1632" stroke-width="1.5"/>
+              r="2.5" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
     </svg>`;
 }
 
 // ── GAUGE SVG ────────────────────────────────────────────────
-function renderGauge(svgId, value, max, color = '#6366f1') {
+function renderGauge(svgId, value, max, color = '#f97316') {
   const svg = document.getElementById(svgId);
   if (!svg) return;
 
@@ -268,11 +268,11 @@ function renderGauge(svgId, value, max, color = '#6366f1') {
 
   svg.innerHTML = `
     <path d="M ${s.x} ${s.y} A ${r} ${r} 0 0 1 ${eTrack.x} ${eTrack.y}"
-          fill="none" stroke="rgba(99,102,241,.12)" stroke-width="10" stroke-linecap="round"/>
+          fill="none" stroke="rgba(249,115,22,.12)" stroke-width="10" stroke-linecap="round"/>
     <path d="M ${s.x} ${s.y} A ${r} ${r} 0 ${filled > 180 ? 1 : 0} 1 ${eArc.x} ${eArc.y}"
           fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
-          style="filter: drop-shadow(0 0 8px ${color}88)"/>
-    <circle cx="${eArc.x}" cy="${eArc.y}" r="5" fill="${color}" stroke="#0c1632" stroke-width="2"/>
+          style="filter: drop-shadow(0 0 6px ${color}66)"/>
+    <circle cx="${eArc.x}" cy="${eArc.y}" r="5" fill="${color}" stroke="#ffffff" stroke-width="2"/>
   `;
 
   const pctEl = document.getElementById('gaugeLabel');
@@ -313,14 +313,14 @@ function initAllCharts() {
 
   const sp = RestaurantData.sparklines;
   setTimeout(() => {
-    renderSparkline('sparkVentas',   sp.ventas,   '#6366f1');
-    renderSparkline('sparkTicket',   sp.ticket,   '#10b981');
-    renderSparkline('sparkClientes', sp.clientes, '#0ea5e9');
-    renderSparkline('sparkDelivery', sp.delivery, '#f59e0b');
+    renderSparkline('sparkVentas',   sp.ventas,   '#f97316');
+    renderSparkline('sparkTicket',   sp.ticket,   '#16a34a');
+    renderSparkline('sparkClientes', sp.clientes, '#0284c7');
+    renderSparkline('sparkDelivery', sp.delivery, '#d97706');
   }, 100);
 
   const kpi = RestaurantData.kpis;
-  renderGauge('gaugeVentas', kpi.ventasHoy, kpi.ventasMeta, '#6366f1');
+  renderGauge('gaugeVentas', kpi.ventasHoy, kpi.ventasMeta, '#f97316');
 }
 
 // ── VERSIONES REUTILIZABLES ───────────────────────────────────
@@ -330,8 +330,8 @@ function initVentasSemanaChartOn(canvasId) {
   const d = RestaurantData.ventasSemana;
 
   const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 220);
-  gradient.addColorStop(0, 'rgba(99,102,241,.35)');
-  gradient.addColorStop(1, 'rgba(99,102,241,0)');
+  gradient.addColorStop(0, 'rgba(249,115,22,.25)');
+  gradient.addColorStop(1, 'rgba(249,115,22,0)');
 
   charts[canvasId] = new Chart(ctx, {
     type: 'line',
@@ -343,11 +343,11 @@ function initVentasSemanaChartOn(canvasId) {
           borderColor: ACCENT, borderWidth: 2.5,
           backgroundColor: gradient, fill: true, tension: 0.4,
           pointBackgroundColor: ACCENT, pointRadius: 4, pointHoverRadius: 7,
-          pointBorderColor: '#05091a', pointBorderWidth: 2
+          pointBorderColor: '#ffffff', pointBorderWidth: 2
         },
         {
           label: 'Semana anterior', data: d.semanaAnterior,
-          borderColor: 'rgba(148,163,184,.3)', borderWidth: 1.5,
+          borderColor: 'rgba(148,163,184,.4)', borderWidth: 1.5,
           borderDash: [4,4], fill: false, tension: 0.4,
           pointRadius: 2, pointHoverRadius: 5
         }
@@ -362,7 +362,7 @@ function initVentasSemanaChartOn(canvasId) {
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 11 } } },
         y: {
-          grid: { color: 'rgba(99,102,241,.07)' },
+          grid: { color: 'rgba(0,0,0,.04)' },
           ticks: { font: { size: 11, family: "'JetBrains Mono', monospace" }, callback: v => `$${(v/1000).toFixed(0)}k` },
           border: { display: false }
         }
@@ -383,8 +383,8 @@ function initCategoryDonutOn(canvasId, legendId, totalId) {
       datasets: [{
         data: d.map(c => c.valor),
         backgroundColor: d.map(c => c.color),
-        borderColor: '#0c1632',
-        borderWidth: 3, hoverOffset: 8, hoverBorderColor: '#112040'
+        borderColor: '#ffffff',
+        borderWidth: 3, hoverOffset: 8, hoverBorderColor: '#f8fafc'
       }]
     },
     options: {
