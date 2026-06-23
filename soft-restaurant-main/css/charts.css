@@ -1,5 +1,5 @@
 /* ============================================================
-   SOFT RESTAURANT DASHBOARD — Charts & Visualizaciones
+   LA HACIENDA · GERENCIA DIGITAL — Charts & Visualizaciones
    ============================================================ */
 
 /* ── CHART CONTAINERS ────────────────────────────────────── */
@@ -7,13 +7,12 @@
   position: relative;
   width: 100%;
 }
-
 .chart-container canvas {
   display: block;
   max-width: 100%;
 }
 
-/* ── CHART HEADER EXTRAS ─────────────────────────────────── */
+/* ── PERIOD SELECTOR ─────────────────────────────────────── */
 .chart-period-selector {
   display: flex;
   gap: var(--space-1);
@@ -23,18 +22,18 @@
   font-weight: var(--fw-semibold);
   padding: 3px 9px;
   border-radius: var(--radius-full);
-  color: var(--color-text-muted);
-  background: var(--color-surface-2);
-  border: 1px solid var(--color-border);
+  color: #4b5980;
+  background: rgba(17,32,64,.7);
+  border: 1px solid rgba(99,102,241,.1);
   transition: all var(--duration) var(--ease);
   cursor: pointer;
   font-family: var(--font-ui);
 }
-.period-btn:hover  { color: var(--color-text-secondary); border-color: var(--color-border-light); }
+.period-btn:hover { color: var(--color-text-secondary); border-color: rgba(99,102,241,.2); }
 .period-btn.active {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  border-color: var(--color-accent-dim);
+  background: rgba(99,102,241,.15);
+  color: #818cf8;
+  border-color: rgba(99,102,241,.3);
 }
 
 /* ── DONUT CHART ─────────────────────────────────────────── */
@@ -68,9 +67,9 @@
 }
 .donut-center-lbl {
   font-size: .6rem;
-  color: var(--color-text-muted);
+  color: #4b5980;
   text-transform: uppercase;
-  letter-spacing: .06em;
+  letter-spacing: .08em;
   margin-top: 3px;
 }
 .donut-legend {
@@ -92,7 +91,7 @@
 }
 .donut-legend-label { flex: 1; color: var(--color-text-secondary); }
 .donut-legend-val   { font-family: var(--font-data); font-weight: var(--fw-semibold); color: var(--color-text-primary); }
-.donut-legend-pct   { color: var(--color-text-muted); margin-left: 2px; }
+.donut-legend-pct   { color: #4b5980; margin-left: 2px; }
 
 /* ── MINI SPARKLINES (inline SVG) ────────────────────────── */
 .sparkline-svg {
@@ -107,10 +106,10 @@
   stroke-linejoin: round;
 }
 .sparkline-area {
-  opacity: .15;
+  opacity: .2;
 }
 
-/* ── HEATMAP DE HORAS ────────────────────────────────────── */
+/* ── HEATMAP ─────────────────────────────────────────────── */
 .heatmap-wrap {
   padding: 0 var(--space-6) var(--space-5);
   overflow-x: auto;
@@ -126,7 +125,7 @@
   align-items: center;
   justify-content: flex-end;
   font-size: .6rem;
-  color: var(--color-text-muted);
+  color: #4b5980;
   padding-right: 6px;
   font-family: var(--font-data);
 }
@@ -135,7 +134,7 @@
   align-items: center;
   justify-content: center;
   font-size: .6rem;
-  color: var(--color-text-muted);
+  color: #4b5980;
   font-family: var(--font-data);
   padding-bottom: 3px;
 }
@@ -146,15 +145,15 @@
   cursor: default;
   position: relative;
 }
-.heatmap-cell:hover { transform: scale(1.15); z-index: 2; }
+.heatmap-cell:hover { transform: scale(1.2); z-index: 2; }
 
-/* intensidades */
-.heat-0 { background: var(--color-surface-2); }
-.heat-1 { background: rgba(249,115,22,.15); }
-.heat-2 { background: rgba(249,115,22,.30); }
-.heat-3 { background: rgba(249,115,22,.50); }
-.heat-4 { background: rgba(249,115,22,.70); }
-.heat-5 { background: rgba(249,115,22,.90); }
+/* Intensidades índigo */
+.heat-0 { background: rgba(17,32,64,.6); }
+.heat-1 { background: rgba(99,102,241,.15); }
+.heat-2 { background: rgba(99,102,241,.30); }
+.heat-3 { background: rgba(99,102,241,.52); }
+.heat-4 { background: rgba(99,102,241,.72); }
+.heat-5 { background: rgba(99,102,241,.90); }
 
 /* ── GAUGE (SVG) ─────────────────────────────────────────── */
 .gauge-wrap {
@@ -175,7 +174,7 @@
 }
 .gauge-lbl {
   font-size: var(--text-xs);
-  color: var(--color-text-muted);
+  color: #4b5980;
   text-align: center;
 }
 
@@ -194,7 +193,7 @@
 .progress-value { color: var(--color-text-primary); font-family: var(--font-data); font-weight: var(--fw-semibold); }
 .progress-track {
   height: 6px;
-  background: var(--color-surface-3);
+  background: rgba(99,102,241,.1);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
@@ -203,7 +202,7 @@
   border-radius: var(--radius-full);
   transition: width .8s var(--ease);
 }
-.progress-fill.accent  { background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dim)); }
-.progress-fill.success { background: linear-gradient(90deg, var(--color-success), #15803d); }
-.progress-fill.info    { background: linear-gradient(90deg, var(--color-info), #0284c7); }
-.progress-fill.warning { background: linear-gradient(90deg, var(--color-warning), #a16207); }
+.progress-fill.accent  { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+.progress-fill.success { background: linear-gradient(90deg, #10b981, #059669); }
+.progress-fill.info    { background: linear-gradient(90deg, #0ea5e9, #0284c7); }
+.progress-fill.warning { background: linear-gradient(90deg, #f59e0b, #d97706); }

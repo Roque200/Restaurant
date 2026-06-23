@@ -1,33 +1,32 @@
 /**
- * SOFT RESTAURANT DASHBOARD
- * charts.js — Lógica de renderizado de gráficas
+ * LA HACIENDA · GERENCIA DIGITAL
+ * charts.js — Lógica de gráficas
  * Depende de: Chart.js (CDN), data.js
  */
 
-// ── CONFIGURACIÓN GLOBAL DE CHART.JS ────────────────────────
-Chart.defaults.color = '#8892b0';
-Chart.defaults.borderColor = '#2a2f45';
+// ── CONFIGURACIÓN GLOBAL ─────────────────────────────────────
+Chart.defaults.color = '#4b5980';
+Chart.defaults.borderColor = 'rgba(99,102,241,.1)';
 Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
 Chart.defaults.plugins.legend.display = false;
-Chart.defaults.plugins.tooltip.backgroundColor = '#1e2335';
-Chart.defaults.plugins.tooltip.borderColor = '#2a2f45';
+Chart.defaults.plugins.tooltip.backgroundColor = '#0c1632';
+Chart.defaults.plugins.tooltip.borderColor = 'rgba(99,102,241,.25)';
 Chart.defaults.plugins.tooltip.borderWidth = 1;
 Chart.defaults.plugins.tooltip.padding = 12;
-Chart.defaults.plugins.tooltip.cornerRadius = 8;
-Chart.defaults.plugins.tooltip.titleColor = '#f0f2f8';
-Chart.defaults.plugins.tooltip.bodyColor = '#8892b0';
+Chart.defaults.plugins.tooltip.cornerRadius = 10;
+Chart.defaults.plugins.tooltip.titleColor = '#f1f5f9';
+Chart.defaults.plugins.tooltip.bodyColor = '#94a3b8';
 
-const ACCENT   = '#f97316';
-const SUCCESS  = '#22c55e';
-const INFO     = '#38bdf8';
-const WARNING  = '#eab308';
-const PURPLE   = '#a78bfa';
-const MUTED    = '#4f5a7a';
+const ACCENT  = '#6366f1';
+const SUCCESS = '#10b981';
+const INFO    = '#0ea5e9';
+const WARNING = '#f59e0b';
+const PURPLE  = '#a855f7';
+const MUTED   = '#4b5980';
 
-// Referencia a instancias para actualización
 const charts = {};
 
-// ── GRAFICA DE VENTAS POR HORA ───────────────────────────────
+// ── VENTAS POR HORA ──────────────────────────────────────────
 function initVentasHoraChart() {
   const ctx = document.getElementById('chartVentasHora');
   if (!ctx) return;
@@ -43,11 +42,11 @@ function initVentasHoraChart() {
           data: d.hoy,
           backgroundColor: d.hoy.map((v, i) =>
             i === d.hoy.length - 1
-              ? 'rgba(249,115,22,.25)'
-              : `rgba(249,115,22,${0.4 + (v / Math.max(...d.hoy)) * 0.5})`
+              ? 'rgba(99,102,241,.2)'
+              : `rgba(99,102,241,${0.35 + (v / Math.max(...d.hoy)) * 0.55})`
           ),
           borderColor: d.hoy.map((v, i) =>
-            i === d.hoy.length - 1 ? 'rgba(249,115,22,.4)' : ACCENT
+            i === d.hoy.length - 1 ? 'rgba(99,102,241,.35)' : ACCENT
           ),
           borderWidth: 1.5,
           borderRadius: 6,
@@ -56,8 +55,8 @@ function initVentasHoraChart() {
         {
           label: 'Ayer',
           data: d.ayer,
-          backgroundColor: 'rgba(136,146,176,.08)',
-          borderColor: 'rgba(136,146,176,.3)',
+          backgroundColor: 'rgba(148,163,184,.06)',
+          borderColor: 'rgba(148,163,184,.2)',
           borderWidth: 1,
           borderRadius: 6,
           borderSkipped: false,
@@ -67,7 +66,7 @@ function initVentasHoraChart() {
           label: 'Meta',
           data: d.meta,
           type: 'line',
-          borderColor: 'rgba(234,179,8,.5)',
+          borderColor: 'rgba(245,158,11,.5)',
           borderWidth: 1.5,
           borderDash: [4, 4],
           pointRadius: 0,
@@ -93,7 +92,7 @@ function initVentasHoraChart() {
           ticks: { font: { size: 11, family: "'JetBrains Mono', monospace" } }
         },
         y: {
-          grid: { color: 'rgba(42,47,69,.5)', lineWidth: 1 },
+          grid: { color: 'rgba(99,102,241,.07)', lineWidth: 1 },
           ticks: {
             font: { size: 11, family: "'JetBrains Mono', monospace" },
             callback: v => `$${(v/1000).toFixed(0)}k`
@@ -105,15 +104,15 @@ function initVentasHoraChart() {
   });
 }
 
-// ── GRAFICA DE VENTAS SEMANAL ────────────────────────────────
+// ── VENTAS SEMANAL ───────────────────────────────────────────
 function initVentasSemanaChart() {
   const ctx = document.getElementById('chartVentasSemana');
   if (!ctx) return;
   const d = RestaurantData.ventasSemana;
 
   const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
-  gradient.addColorStop(0, 'rgba(249,115,22,.3)');
-  gradient.addColorStop(1, 'rgba(249,115,22,0)');
+  gradient.addColorStop(0, 'rgba(99,102,241,.35)');
+  gradient.addColorStop(1, 'rgba(99,102,241,0)');
 
   charts.ventasSemana = new Chart(ctx, {
     type: 'line',
@@ -131,13 +130,13 @@ function initVentasSemanaChart() {
           pointBackgroundColor: ACCENT,
           pointRadius: 4,
           pointHoverRadius: 7,
-          pointBorderColor: '#0f1117',
+          pointBorderColor: '#05091a',
           pointBorderWidth: 2,
         },
         {
           label: 'Semana anterior',
           data: d.semanaAnterior,
-          borderColor: 'rgba(136,146,176,.4)',
+          borderColor: 'rgba(148,163,184,.3)',
           borderWidth: 1.5,
           borderDash: [4,4],
           fill: false,
@@ -164,7 +163,7 @@ function initVentasSemanaChart() {
           ticks: { font: { size: 11 } }
         },
         y: {
-          grid: { color: 'rgba(42,47,69,.5)' },
+          grid: { color: 'rgba(99,102,241,.07)' },
           ticks: {
             font: { size: 11, family: "'JetBrains Mono', monospace" },
             callback: v => `$${(v/1000).toFixed(0)}k`
@@ -189,10 +188,10 @@ function initCategoryDonut() {
       datasets: [{
         data: d.map(c => c.valor),
         backgroundColor: d.map(c => c.color),
-        borderColor: '#181c27',
+        borderColor: '#0c1632',
         borderWidth: 3,
         hoverOffset: 8,
-        hoverBorderColor: '#1e2335',
+        hoverBorderColor: '#112040',
       }]
     },
     options: {
@@ -211,7 +210,7 @@ function initCategoryDonut() {
 }
 
 // ── MINI SPARKLINES SVG ──────────────────────────────────────
-function renderSparkline(containerId, data, color = '#f97316') {
+function renderSparkline(containerId, data, color = '#6366f1') {
   const el = document.getElementById(containerId);
   if (!el) return;
 
@@ -235,19 +234,19 @@ function renderSparkline(containerId, data, color = '#f97316') {
     <svg class="sparkline-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
       <defs>
         <linearGradient id="sg_${containerId}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${color}" stop-opacity=".4"/>
+          <stop offset="0%" stop-color="${color}" stop-opacity=".5"/>
           <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
         </linearGradient>
       </defs>
       <path class="sparkline-area" d="${areaD}" fill="url(#sg_${containerId})"/>
       <path class="sparkline-path" d="${pathD}" stroke="${color}"/>
       <circle cx="${points[points.length-1].split(',')[0]}" cy="${points[points.length-1].split(',')[1]}"
-              r="2.5" fill="${color}" stroke="#181c27" stroke-width="1.5"/>
+              r="2.5" fill="${color}" stroke="#0c1632" stroke-width="1.5"/>
     </svg>`;
 }
 
 // ── GAUGE SVG ────────────────────────────────────────────────
-function renderGauge(svgId, value, max, color = '#f97316') {
+function renderGauge(svgId, value, max, color = '#6366f1') {
   const svg = document.getElementById(svgId);
   if (!svg) return;
 
@@ -255,8 +254,7 @@ function renderGauge(svgId, value, max, color = '#f97316') {
   const r = 70;
   const cx = 90; const cy = 90;
   const startAngle = -180;
-  const endAngle = 0;
-  const totalAngle = endAngle - startAngle;
+  const totalAngle = 180;
   const filled = totalAngle * pct;
 
   function polarToXY(angleDeg, radius) {
@@ -265,23 +263,23 @@ function renderGauge(svgId, value, max, color = '#f97316') {
   }
 
   const s = polarToXY(startAngle, r);
-  const eTrack = polarToXY(endAngle, r);
+  const eTrack = polarToXY(0, r);
   const eArc = polarToXY(startAngle + filled, r);
 
   svg.innerHTML = `
-    <!-- Track -->
     <path d="M ${s.x} ${s.y} A ${r} ${r} 0 0 1 ${eTrack.x} ${eTrack.y}"
-          fill="none" stroke="#2a2f45" stroke-width="10" stroke-linecap="round"/>
-    <!-- Fill -->
+          fill="none" stroke="rgba(99,102,241,.12)" stroke-width="10" stroke-linecap="round"/>
     <path d="M ${s.x} ${s.y} A ${r} ${r} 0 ${filled > 180 ? 1 : 0} 1 ${eArc.x} ${eArc.y}"
           fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"
-          style="filter: drop-shadow(0 0 6px ${color}55)"/>
-    <!-- Dot -->
-    <circle cx="${eArc.x}" cy="${eArc.y}" r="5" fill="${color}" stroke="#181c27" stroke-width="2"/>
+          style="filter: drop-shadow(0 0 8px ${color}88)"/>
+    <circle cx="${eArc.x}" cy="${eArc.y}" r="5" fill="${color}" stroke="#0c1632" stroke-width="2"/>
   `;
+
+  const pctEl = document.getElementById('gaugeLabel');
+  if (pctEl) pctEl.textContent = `${Math.round(pct * 100)}%`;
 }
 
-// ── HEATMAP DE OCUPACIÓN ─────────────────────────────────────
+// ── HEATMAP ──────────────────────────────────────────────────
 function renderHeatmap() {
   const container = document.getElementById('heatmapGrid');
   if (!container) return;
@@ -289,19 +287,17 @@ function renderHeatmap() {
   const d = RestaurantData.heatmap;
   let html = '';
 
-  // Fila de encabezados de horas
   html += '<div class="heatmap-label"></div>';
   d.horas.forEach(h => {
     html += `<div class="heatmap-col-label">${h}</div>`;
   });
 
-  // Filas de datos
   d.dias.forEach((dia, di) => {
     html += `<div class="heatmap-label">${dia}</div>`;
     d.horas.forEach((_, hi) => {
       const val = d.datos[di][hi];
-      const venta = val > 0 ? `title="${val * 12} comandas aprox."` : '';
-      html += `<div class="heatmap-cell heat-${val}" ${venta}></div>`;
+      const hint = val > 0 ? `title="${val * 12} comandas aprox."` : '';
+      html += `<div class="heatmap-cell heat-${val}" ${hint}></div>`;
     });
   });
 
@@ -315,51 +311,61 @@ function initAllCharts() {
   initCategoryDonut();
   renderHeatmap();
 
-  // Sparklines
   const sp = RestaurantData.sparklines;
   setTimeout(() => {
-    renderSparkline('sparkVentas',   sp.ventas,   '#f97316');
-    renderSparkline('sparkTicket',   sp.ticket,   '#22c55e');
-    renderSparkline('sparkClientes', sp.clientes, '#38bdf8');
-    renderSparkline('sparkOcupacion',sp.ocupacion,'#eab308');
+    renderSparkline('sparkVentas',   sp.ventas,   '#6366f1');
+    renderSparkline('sparkTicket',   sp.ticket,   '#10b981');
+    renderSparkline('sparkClientes', sp.clientes, '#0ea5e9');
+    renderSparkline('sparkDelivery', sp.delivery, '#f59e0b');
   }, 100);
 
-  // Gauge de ventas vs meta
   const kpi = RestaurantData.kpis;
-  renderGauge('gaugeVentas', kpi.ventasHoy, kpi.ventasMeta, '#f97316');
+  renderGauge('gaugeVentas', kpi.ventasHoy, kpi.ventasMeta, '#6366f1');
 }
 
-// ── VERSIONES REUTILIZABLES (para otras páginas) ─────────────
+// ── VERSIONES REUTILIZABLES ───────────────────────────────────
 function initVentasSemanaChartOn(canvasId) {
   const ctx = document.getElementById(canvasId);
   if (!ctx || charts[canvasId]) return;
   const d = RestaurantData.ventasSemana;
 
   const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 220);
-  gradient.addColorStop(0, 'rgba(249,115,22,.3)');
-  gradient.addColorStop(1, 'rgba(249,115,22,0)');
+  gradient.addColorStop(0, 'rgba(99,102,241,.35)');
+  gradient.addColorStop(1, 'rgba(99,102,241,0)');
 
   charts[canvasId] = new Chart(ctx, {
     type: 'line',
     data: {
       labels: d.labels,
       datasets: [
-        { label: 'Esta semana', data: d.semanaActual, borderColor: ACCENT, borderWidth: 2.5,
+        {
+          label: 'Esta semana', data: d.semanaActual,
+          borderColor: ACCENT, borderWidth: 2.5,
           backgroundColor: gradient, fill: true, tension: 0.4,
           pointBackgroundColor: ACCENT, pointRadius: 4, pointHoverRadius: 7,
-          pointBorderColor: '#0f1117', pointBorderWidth: 2 },
-        { label: 'Semana anterior', data: d.semanaAnterior, borderColor: 'rgba(136,146,176,.4)',
-          borderWidth: 1.5, borderDash: [4,4], fill: false, tension: 0.4,
-          pointRadius: 2, pointHoverRadius: 5 }
+          pointBorderColor: '#05091a', pointBorderWidth: 2
+        },
+        {
+          label: 'Semana anterior', data: d.semanaAnterior,
+          borderColor: 'rgba(148,163,184,.3)', borderWidth: 1.5,
+          borderDash: [4,4], fill: false, tension: 0.4,
+          pointRadius: 2, pointHoverRadius: 5
+        }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
-      plugins: { tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString('es-MX')}` } } },
+      plugins: {
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString('es-MX')}` } }
+      },
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-        y: { grid: { color: 'rgba(42,47,69,.5)' }, ticks: { font: { size: 11, family: "'JetBrains Mono', monospace" }, callback: v => `$${(v/1000).toFixed(0)}k` }, border: { display: false } }
+        y: {
+          grid: { color: 'rgba(99,102,241,.07)' },
+          ticks: { font: { size: 11, family: "'JetBrains Mono', monospace" }, callback: v => `$${(v/1000).toFixed(0)}k` },
+          border: { display: false }
+        }
       }
     }
   });
@@ -374,12 +380,18 @@ function initCategoryDonutOn(canvasId, legendId, totalId) {
     type: 'doughnut',
     data: {
       labels: d.map(c => c.nombre),
-      datasets: [{ data: d.map(c => c.valor), backgroundColor: d.map(c => c.color),
-        borderColor: '#181c27', borderWidth: 3, hoverOffset: 8, hoverBorderColor: '#1e2335' }]
+      datasets: [{
+        data: d.map(c => c.valor),
+        backgroundColor: d.map(c => c.color),
+        borderColor: '#0c1632',
+        borderWidth: 3, hoverOffset: 8, hoverBorderColor: '#112040'
+      }]
     },
     options: {
       cutout: '72%', responsive: false, animation: { animateScale: true },
-      plugins: { tooltip: { callbacks: { label: ctx => ` ${ctx.label}: $${ctx.parsed.toLocaleString('es-MX')}` } } }
+      plugins: {
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: $${ctx.parsed.toLocaleString('es-MX')}` } }
+      }
     }
   });
 
@@ -398,7 +410,7 @@ function initCategoryDonutOn(canvasId, legendId, totalId) {
   if (totalEl) totalEl.textContent = `$${(total/1000).toFixed(1)}k`;
 }
 
-// ── SIMULACIÓN DE DATOS EN VIVO ──────────────────────────────
+// ── SIMULACIÓN EN VIVO ───────────────────────────────────────
 function startLiveSimulation() {
   setInterval(() => {
     const variation = () => (Math.random() - 0.5) * 200;
@@ -410,12 +422,10 @@ function startLiveSimulation() {
       charts.ventasHora.update('none');
     }
 
-    // Actualizar KPI de ventas en vivo
     RestaurantData.kpis.ventasHoy += Math.floor(Math.random() * 80);
     const el = document.getElementById('kpiVentasHoy');
     if (el) {
-      const v = RestaurantData.kpis.ventasHoy;
-      el.textContent = `$${v.toLocaleString('es-MX')}`;
+      el.textContent = `$${RestaurantData.kpis.ventasHoy.toLocaleString('es-MX')}`;
     }
   }, 5000);
 }
