@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soft Restaurant · Dashboard Gerencial</title>
+  <title>La Hacienda · Gerencia Digital</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/charts.css">
 </head>
@@ -16,49 +16,35 @@
   ════════════════════════════════════════════ -->
   <aside class="sidebar">
 
-    <!-- Logo -->
     <div class="sidebar-logo">
       <div class="logo-icon" id="logoIconSlot"></div>
       <div class="logo-text">
         <strong>La Hacienda</strong>
-        <span>Dashboard</span>
+        <span>Gerencia Digital</span>
       </div>
     </div>
 
-    <!-- Navegación principal -->
+    <!-- Principal -->
     <nav class="sidebar-section">
       <div class="sidebar-label">Principal</div>
       <div class="nav-item active" data-view="resumen" data-icon="dashboard">
         <span class="nav-icon"></span>
         <span>Resumen del día</span>
       </div>
-      <div class="nav-item" data-view="mesas" data-icon="table">
-        <span class="nav-icon"></span>
-        <span>Control de mesas</span>
-      </div>
-      <div class="nav-item" data-view="comandas" data-icon="clipboard">
-        <span class="nav-icon"></span>
-        <span>Comandas</span>
-        <span class="nav-badge">3</span>
-      </div>
-      <div class="nav-item" data-view="inventario" data-icon="box">
-        <span class="nav-icon"></span>
-        <span>Inventario</span>
-      </div>
-      <div class="nav-item" data-view="facturacion" data-icon="invoice">
-        <span class="nav-icon"></span>
-        <span>Facturación</span>
-      </div>
       <div class="nav-item" data-view="delivery" data-icon="truck">
         <span class="nav-icon"></span>
         <span>Delivery</span>
-        <span class="nav-badge">1</span>
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" data-view="reservaciones" data-icon="calendar">
+        <span class="nav-icon"></span>
+        <span>Reservaciones</span>
       </div>
     </nav>
 
-    <!-- Reportes -->
+    <!-- Analítica -->
     <nav class="sidebar-section">
-      <div class="sidebar-label">Reportes</div>
+      <div class="sidebar-label">Analítica</div>
       <div class="nav-item" data-view="ventas" data-icon="chartLine">
         <span class="nav-icon"></span>
         <span>Ventas</span>
@@ -71,22 +57,18 @@
         <span class="nav-icon"></span>
         <span>Platillos</span>
       </div>
-      <div class="nav-item" data-view="reservaciones" data-icon="calendar">
-        <span class="nav-icon"></span>
-        <span>Reservaciones</span>
-      </div>
     </nav>
 
-    <!-- Configuración -->
+    <!-- Sistema -->
     <nav class="sidebar-section">
       <div class="sidebar-label">Sistema</div>
-      <div class="nav-item" data-view="configuracion" data-icon="settings">
-        <span class="nav-icon"></span>
-        <span>Configuración</span>
-      </div>
       <div class="nav-item" data-view="integraciones" data-icon="plug">
         <span class="nav-icon"></span>
         <span>Integraciones</span>
+      </div>
+      <div class="nav-item" data-view="configuracion" data-icon="settings">
+        <span class="nav-icon"></span>
+        <span>Configuración</span>
       </div>
     </nav>
 
@@ -114,26 +96,22 @@
 
     <div class="header-spacer"></div>
 
-    <!-- Buscador -->
     <div class="header-search">
       <span id="searchIconSlot"></span>
-      <input type="text" placeholder="Buscar platillo, mesa...">
+      <input type="text" placeholder="Buscar reservación, cliente...">
     </div>
 
-    <!-- Reloj -->
     <div class="date-chip" id="liveClock">00:00:00</div>
 
-    <!-- Notificaciones -->
     <button class="header-btn" title="Alertas" id="bellBtnSlot">
       <span class="dot"></span>
     </button>
 
-    <!-- Perfil -->
     <button class="header-btn" title="Mi cuenta" id="userBtnSlot"></button>
   </header>
 
   <!-- ═══════════════════════════════════════════
-       MAIN — contiene todas las páginas
+       MAIN
   ════════════════════════════════════════════ -->
   <main class="main">
 
@@ -150,7 +128,7 @@
         </div>
         <div class="status-sep">·</div>
         <div class="status-item">
-          <div class="status-dot orange"></div>
+          <div class="status-dot purple"></div>
           <span>Turno: <span class="status-val">Comida</span></span>
         </div>
         <div class="status-sep">·</div>
@@ -161,23 +139,23 @@
         </div>
         <div class="status-sep">·</div>
         <div class="status-item">
-          Mesas activas:
-          <span class="status-val" id="statusOcupacion">0/0</span>
+          <div class="status-dot orange animate-pulse"></div>
+          <span>Delivery: <span class="status-val" id="statusDelivery">3 activos</span></span>
         </div>
         <div class="status-sep">·</div>
         <div class="status-item">
-          <div class="status-dot yellow animate-pulse"></div>
-          <span>2 alertas de inventario</span>
+          Reservaciones hoy:
+          <span class="status-val" id="statusReservas">2 confirmadas</span>
         </div>
         <div style="margin-left:auto">
-          <span class="chip success">Delivery activo</span>
+          <span class="chip accent">3 plataformas activas</span>
         </div>
       </div>
 
       <!-- KPI CARDS -->
       <div class="kpi-grid" id="kpiGrid"></div>
 
-      <!-- FILA 1: Gráfica hora + Mesas + Donut -->
+      <!-- FILA 1: Ventas hora + Delivery en Curso + Donut -->
       <div class="content-grid">
 
         <!-- Ventas por hora -->
@@ -206,20 +184,14 @@
           </div>
         </div>
 
-        <!-- Control de mesas -->
+        <!-- Delivery en Curso (complementario a Soft Restaurant) -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="card-title-icon" id="iconMesas"></span>Control de Mesas</div>
-            <span class="card-action" data-goto="mesas">Ver plano →</span>
+            <div class="card-title"><span class="card-title-icon" id="iconDeliveryResumen"></span>Delivery · En Curso</div>
+            <span class="card-action" data-goto="delivery">Ver todo →</span>
           </div>
-          <div class="mesas-grid" id="mesasGrid"></div>
-          <div class="mesas-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(34,197,94,.5)"></div><span>Libre</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(249,115,22,.6)"></div><span>Ocupada</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(234,179,8,.6)"></div><span>Pidiendo cuenta</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(56,189,248,.5)"></div><span>Reservada</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,.5)"></div><span>Mantenimiento</span></div>
-          </div>
+          <div class="platform-summary" id="platformSummary"></div>
+          <div class="order-list" id="deliveryActiveList"></div>
         </div>
 
         <!-- Ventas por categoría (donut) -->
@@ -249,7 +221,7 @@
 
       </div>
 
-      <!-- FILA 2: Semana + Órdenes recientes -->
+      <!-- FILA 2: Semana + Próximas Reservaciones -->
       <div class="content-grid-2">
 
         <div class="card">
@@ -264,15 +236,15 @@
 
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="card-title-icon" id="iconOrdenes"></span>Comandas Recientes</div>
-            <span class="card-action" data-goto="comandas">Ver todas</span>
+            <div class="card-title"><span class="card-title-icon" id="iconReservas"></span>Próximas Reservaciones</div>
+            <span class="card-action" data-goto="reservaciones">Ver todas</span>
           </div>
-          <div class="order-list" id="ordenesList"></div>
+          <div class="reserva-list" id="reservasList"></div>
         </div>
 
       </div>
 
-      <!-- FILA 3: Platillos + Heatmap + Panel derecho -->
+      <!-- FILA 3: Platillos + Heatmap + Notificaciones + Meseros -->
       <div class="content-grid">
 
         <div class="card">
@@ -286,7 +258,6 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="card-title-icon" id="iconHeatmap"></span>Ocupación por Hora y Día</div>
-            <span class="card-action" data-goto="mesas">Ver análisis</span>
           </div>
           <div class="heatmap-wrap">
             <div class="heatmap-grid" id="heatmapGrid"></div>
@@ -294,9 +265,9 @@
           <div style="display:flex; align-items:center; gap:6px; padding:8px 24px 16px; font-size:.65rem; color:var(--color-text-muted)">
             <span>Bajo</span>
             <div style="width:14px;height:14px;border-radius:3px;background:var(--color-surface-2)"></div>
-            <div style="width:14px;height:14px;border-radius:3px;background:rgba(249,115,22,.2)"></div>
-            <div style="width:14px;height:14px;border-radius:3px;background:rgba(249,115,22,.5)"></div>
-            <div style="width:14px;height:14px;border-radius:3px;background:rgba(249,115,22,.8)"></div>
+            <div style="width:14px;height:14px;border-radius:3px;background:rgba(99,102,241,.2)"></div>
+            <div style="width:14px;height:14px;border-radius:3px;background:rgba(99,102,241,.5)"></div>
+            <div style="width:14px;height:14px;border-radius:3px;background:rgba(99,102,241,.88)"></div>
             <span>Alto</span>
           </div>
         </div>
@@ -305,10 +276,10 @@
 
           <div class="card">
             <div class="card-header">
-              <div class="card-title"><span class="card-title-icon" id="iconAlertas"></span>Alertas de Inventario</div>
-              <span class="chip danger">2 críticos</span>
+              <div class="card-title"><span class="card-title-icon" id="iconNotif"></span>Notificaciones</div>
+              <span class="chip info">5 nuevas</span>
             </div>
-            <div class="alert-list" id="alertasList"></div>
+            <div class="notif-list" id="notifList"></div>
           </div>
 
           <div class="card">
@@ -320,29 +291,21 @@
           </div>
 
         </div>
-
       </div>
     </section><!-- /page-resumen -->
 
-    <!-- ─────────────────────────────────────────
-         DEMÁS PÁGINAS (se llenan dinámicamente)
-    ────────────────────────────────────────── -->
-    <section class="page" id="page-mesas"></section>
-    <section class="page" id="page-comandas"></section>
-    <section class="page" id="page-inventario"></section>
-    <section class="page" id="page-facturacion"></section>
+    <!-- DEMÁS PÁGINAS (se llenan dinámicamente) -->
     <section class="page" id="page-delivery"></section>
+    <section class="page" id="page-reservaciones"></section>
     <section class="page" id="page-ventas"></section>
     <section class="page" id="page-meseros"></section>
     <section class="page" id="page-platillos"></section>
-    <section class="page" id="page-reservaciones"></section>
     <section class="page" id="page-configuracion"></section>
     <section class="page" id="page-integraciones"></section>
 
-  </main><!-- /main -->
-</div><!-- /app-shell -->
+  </main>
+</div>
 
-<!-- Scripts: orden correcto -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/data.js"></script>
