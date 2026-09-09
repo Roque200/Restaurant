@@ -1,5 +1,5 @@
 (function () {
-  var WHATSAPP_NUMBER = '52XXXXXXXXXX'; // TODO: reemplazar con el número real de WhatsApp del taller
+  var WHATSAPP_NUMBER = '524612315670';
 
   /* =========================================================
      Header / nav / FAQ
