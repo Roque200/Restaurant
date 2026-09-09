@@ -55,11 +55,43 @@ for (const viewport of VIEWPORTS) {
       await expect(faqButton).toHaveAttribute('aria-expanded', 'true');
       await expect(firstFaq.locator('.faq-answer p')).toBeVisible();
 
-      // Interacción: formulario de contacto
+      // Interacción: filtro de productos y carrito
+      await page.locator('#productos').scrollIntoViewIfNeeded();
+      await page.locator('.filter-chip[data-filter="herramientas"]').click();
+      await expect(page.locator('.product-card[data-category="herramientas"]')).toBeVisible();
+      await expect(page.locator('.product-card[data-category="componentes"]').first()).toBeHidden();
+      await page.locator('.filter-chip[data-filter="todos"]').click();
+
+      const firstAddToCart = page.locator('.add-to-cart').first();
+      const secondAddToCart = page.locator('.add-to-cart').nth(1);
+      await firstAddToCart.scrollIntoViewIfNeeded();
+      await firstAddToCart.click();
+      await expect(page.locator('#cartCount')).toHaveText('1');
+      // El carrito no debe abrirse solo, para no bloquear el clic en el siguiente producto
+      await expect(page.locator('#cartPanel')).not.toHaveClass(/is-open/);
+      await secondAddToCart.scrollIntoViewIfNeeded();
+      await secondAddToCart.click();
+      await expect(page.locator('#cartCount')).toHaveText('2');
+
+      await page.locator('#cartToggle').click();
+      await expect(page.locator('#cartPanel')).toHaveClass(/is-open/);
+      await expect(page.locator('.cart-item')).toHaveCount(2);
+      await page.locator('#cartClose').click();
+      await expect(page.locator('#cartPanel')).not.toHaveClass(/is-open/);
+
+      // Interacción: calendario de citas — elegir la primera fecha y horario disponibles
       await page.locator('#contacto').scrollIntoViewIfNeeded();
+      await page.locator('.calendar-cell.is-free').first().click();
+      await expect(page.locator('.calendar-cell.is-selected')).toBeVisible();
+      await page.locator('.slot-chip.is-free').first().click();
+      await expect(page.locator('.slot-chip.is-selected')).toBeVisible();
+      await expect(page.locator('#bookingSubmit')).toBeEnabled();
+      await expect(page.locator('#bookingSelectionText')).not.toHaveText('Sin fecha ni horario seleccionados');
+
+      // Interacción: formulario de contacto
       await page.locator('#nombre').fill('Rider de prueba');
       await page.locator('#telefono').fill('3312345678');
-      await page.locator('#servicio').selectOption('suspension');
+      await page.locator('#servicio').selectOption('Servicio de suspensión');
       await expect(page.locator('#nombre')).toHaveValue('Rider de prueba');
 
       // Neutraliza elementos fixed antes del full-page screenshot para evitar

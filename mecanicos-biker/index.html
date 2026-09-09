@@ -155,7 +155,7 @@
       <nav class="main-nav" id="mainNav" aria-label="Navegación principal">
         <ul>
           <li><a href="#servicios">Servicios</a></li>
-          <li><a href="#proceso">Proceso</a></li>
+          <li><a href="#productos">Productos</a></li>
           <li><a href="#paquetes">Paquetes</a></li>
           <li><a href="#preguntas">Preguntas</a></li>
           <li><a href="#contacto">Contacto</a></li>
@@ -163,6 +163,10 @@
       </nav>
 
       <div class="header-actions">
+        <button class="cart-toggle" id="cartToggle" aria-expanded="false" aria-controls="cartPanel" aria-label="Ver carrito de productos">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.2a2 2 0 0 0 2-1.6L20 8H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="20" r="1.4" fill="currentColor"/><circle cx="17" cy="20" r="1.4" fill="currentColor"/></svg>
+          <span class="cart-count" id="cartCount" hidden>0</span>
+        </button>
         <a href="#contacto" class="btn btn-primary btn-sm">Agendar servicio</a>
         <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mainNav" aria-label="Abrir menú de navegación">
           <span></span><span></span><span></span>
@@ -170,6 +174,30 @@
       </div>
     </div>
   </header>
+
+  <div class="cart-overlay" id="cartOverlay" hidden></div>
+  <aside class="cart-panel" id="cartPanel" aria-label="Carrito de productos" aria-hidden="true">
+    <div class="cart-panel-head">
+      <h2>Tu carrito</h2>
+      <button class="cart-close" id="cartClose" aria-label="Cerrar carrito">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <p class="cart-empty" id="cartEmpty">Aún no has agregado productos.</p>
+    </div>
+    <div class="cart-panel-foot">
+      <div class="cart-subtotal">
+        <span>Subtotal</span>
+        <strong id="cartSubtotal">$0 MXN</strong>
+      </div>
+      <a href="#" class="btn btn-primary btn-lg cart-whatsapp" id="cartWhatsapp">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.6 14.3c-.2.6-1.3 1.2-1.9 1.3-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.6-.6-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.4.2.5.7 1.8.8 1.9.1.2.1.3 0 .5-.1.2-.2.3-.3.5l-.5.5c-.2.2-.3.4-.1.7.2.3.7 1.2 1.6 1.9 1.1.9 2 1.2 2.3 1.4.3.1.5.1.6-.1.2-.2.6-.7.8-1 .2-.2.4-.2.6-.1l1.7.8c.2.1.4.2.4.4.1.2.1.7-.1 1.3z"/></svg>
+        <span>Pedir por WhatsApp</span>
+      </a>
+      <p class="cart-note">Confirmamos disponibilidad y forma de pago por WhatsApp.</p>
+    </div>
+  </aside>
 
   <main id="main">
     <!-- HERO -->
@@ -380,6 +408,147 @@
       </div>
     </section>
 
+    <!-- PRODUCTOS -->
+    <section class="section section--dark" id="productos" aria-labelledby="productos-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Tienda</p>
+          <h2 id="productos-title">Productos en venta</h2>
+          <p class="section-desc section-desc--light">Refacciones y accesorios que también instalamos en el taller. Agrega al carrito y confirmamos existencia y pago por WhatsApp.</p>
+        </div>
+
+        <div class="product-filters" id="productFilters" role="tablist" aria-label="Filtrar productos por categoría">
+          <button class="filter-chip is-active" data-filter="todos" role="tab" aria-selected="true">Todos</button>
+          <button class="filter-chip" data-filter="componentes" role="tab" aria-selected="false">Componentes</button>
+          <button class="filter-chip" data-filter="accesorios" role="tab" aria-selected="false">Accesorios</button>
+          <button class="filter-chip" data-filter="cuidado" role="tab" aria-selected="false">Cuidado</button>
+          <button class="filter-chip" data-filter="herramientas" role="tab" aria-selected="false">Herramientas</button>
+        </div>
+
+        <div class="product-grid" id="productGrid">
+          <article class="product-card" data-category="accesorios">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><path d="M4 15c0-4.4 3.6-8 8-8s8 3.6 8 8v1H4v-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 16h16M8 16v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Accesorios</span>
+              <h3>Casco MTB ProShield</h3>
+              <p>Ajuste giratorio, ventilación de 18 puertos y certificación de impacto.</p>
+              <div class="product-footer">
+                <span class="product-price">$890<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Casco MTB ProShield" data-price="890">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="accesorios">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><path d="M6 10V6a2 2 0 1 1 4 0v4M10 8V5a2 2 0 1 1 4 0v5M14 9V6a2 2 0 1 1 4 0v6a6 6 0 0 1-6 6H9a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Accesorios</span>
+              <h3>Guantes ReinforceGrip</h3>
+              <p>Palma reforzada anti-vibración, dedos táctiles para pantalla.</p>
+              <div class="product-footer">
+                <span class="product-price">$350<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Guantes ReinforceGrip" data-price="350">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="componentes">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="1.5" width="2" height="3" rx="1" fill="currentColor"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Componentes</span>
+              <h3>Cámara MTB 29"</h3>
+              <p>Butilo estándar, válvula Presta 48mm, compatible rodada 29.</p>
+              <div class="product-footer">
+                <span class="product-price">$180<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Cámara MTB 29&quot;" data-price="180">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="componentes">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2M12 19v2M21 12h-2M5 12H3M18.4 5.6l-1.4 1.4M7 16l-1.4 1.4M18.4 18.4L17 17M7 8 5.6 6.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Componentes</span>
+              <h3>Llanta Tubeless 29x2.3</h3>
+              <p>Compuesto de baja resistencia a la rodadura, refuerzo anti-ponchaduras.</p>
+              <div class="product-footer">
+                <span class="product-price">$1,190<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Llanta Tubeless 29x2.3" data-price="1190">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="componentes">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><rect x="2.5" y="9" width="8" height="6" rx="3" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="9" width="8" height="6" rx="3" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Componentes</span>
+              <h3>Cadena 12 velocidades</h3>
+              <p>Recubrimiento anticorrosivo, compatible con la mayoría de grupos 12V.</p>
+              <div class="product-footer">
+                <span class="product-price">$650<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Cadena 12 velocidades" data-price="650">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="componentes">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="6" r="0.9" fill="currentColor"/><circle cx="12" cy="18" r="0.9" fill="currentColor"/><circle cx="6" cy="12" r="0.9" fill="currentColor"/><circle cx="18" cy="12" r="0.9" fill="currentColor"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Componentes</span>
+              <h3>Pastillas de freno semi-metálicas</h3>
+              <p>Mayor mordida en mojado, compatibles con las principales marcas hidráulicas.</p>
+              <div class="product-footer">
+                <span class="product-price">$280<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Pastillas de freno semi-metálicas" data-price="280">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="cuidado">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><path d="M9 3h6v3l2 2v11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V8l2-2V3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Cuidado</span>
+              <h3>Lubricante de cadena (cera)</h3>
+              <p>Fórmula en cera de baja adherencia al polvo, para clima seco y mixto.</p>
+              <div class="product-footer">
+                <span class="product-price">$220<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Lubricante de cadena (cera)" data-price="220">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="herramientas">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Herramientas</span>
+              <h3>Multiherramienta 16 en 1</h3>
+              <p>Llaves Allen, desarmadores y desmontallantas en un solo cuerpo compacto.</p>
+              <div class="product-footer">
+                <span class="product-price">$450<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Multiherramienta 16 en 1" data-price="450">Agregar</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- TESTIMONIOS -->
     <section class="section section--muted" aria-labelledby="testi-title">
       <div class="container">
@@ -498,34 +667,67 @@
       </div>
     </section>
 
-    <!-- CTA CONTACTO -->
+    <!-- CTA CONTACTO / AGENDA -->
     <section class="cta-band" id="contacto" aria-labelledby="cta-title">
-      <div class="container cta-inner">
+      <div class="container">
         <div class="cta-copy">
           <h2 id="cta-title">Agenda el servicio de tu bici</h2>
-          <p>Cuéntanos qué necesita tu bicicleta y te contactamos para confirmar tu cita.</p>
+          <p>Elige un día y horario disponible, cuéntanos qué necesita tu bici y confirmamos por WhatsApp.</p>
         </div>
-        <form class="cta-form" novalidate>
-          <div class="form-row">
-            <label for="nombre">Nombre</label>
-            <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required autocomplete="name">
+
+        <div class="booking-grid">
+          <div class="booking-calendar-card">
+            <div class="calendar-head">
+              <button type="button" class="calendar-nav" id="calPrev" aria-label="Mes anterior">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <span class="calendar-month" id="calMonthLabel">Mes</span>
+              <button type="button" class="calendar-nav" id="calNext" aria-label="Mes siguiente">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="calendar-weekdays">
+              <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Selecciona una fecha"></div>
+            <div class="calendar-legend">
+              <span><i class="legend-dot legend-dot--free"></i> Disponible</span>
+              <span><i class="legend-dot legend-dot--busy"></i> Sin cupo</span>
+              <span><i class="legend-dot legend-dot--closed"></i> Cerrado</span>
+            </div>
+
+            <div class="slot-section">
+              <p class="slot-label" id="slotLabel">Elige primero una fecha</p>
+              <div class="slot-grid" id="slotGrid"></div>
+            </div>
           </div>
-          <div class="form-row">
-            <label for="telefono">Teléfono</label>
-            <input type="tel" id="telefono" name="telefono" placeholder="10 dígitos" required autocomplete="tel">
-          </div>
-          <div class="form-row">
-            <label for="servicio">Servicio de interés</label>
-            <select id="servicio" name="servicio">
-              <option value="suspension">Servicio de suspensión</option>
-              <option value="frenos">Frenos hidráulicos</option>
-              <option value="transmision">Transmisión</option>
-              <option value="afinacion">Afinación general</option>
-              <option value="diagnostico">Diagnóstico</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary btn-lg">Enviar solicitud</button>
-        </form>
+
+          <form class="cta-form" id="bookingForm" novalidate>
+            <div class="booking-selection" id="bookingSelection" aria-live="polite">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M8 2v4M16 2v4M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span id="bookingSelectionText">Sin fecha ni horario seleccionados</span>
+            </div>
+            <div class="form-row">
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required autocomplete="name">
+            </div>
+            <div class="form-row">
+              <label for="telefono">Teléfono</label>
+              <input type="tel" id="telefono" name="telefono" placeholder="10 dígitos" required autocomplete="tel">
+            </div>
+            <div class="form-row">
+              <label for="servicio">Servicio de interés</label>
+              <select id="servicio" name="servicio">
+                <option value="Servicio de suspensión">Servicio de suspensión</option>
+                <option value="Frenos hidráulicos">Frenos hidráulicos</option>
+                <option value="Transmisión">Transmisión</option>
+                <option value="Afinación general">Afinación general</option>
+                <option value="Diagnóstico">Diagnóstico</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="bookingSubmit" disabled>Confirmar cita por WhatsApp</button>
+          </form>
+        </div>
       </div>
     </section>
   </main>
