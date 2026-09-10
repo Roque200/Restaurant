@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mecánicos Biker — Taller especializado en MTB</title>
+  <meta name="description" content="Taller especializado en bicicletas de montaña: servicio de suspensión, frenos, transmisión y mantenimiento general. Técnicos certificados y garantía por escrito.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2212%22 fill=%22%230B0B0C%22/><circle cx=%2212%22 cy=%2212%22 r=%229%22 fill=%22none%22 stroke=%22%23F97316%22 stroke-width=%222%22/></svg>">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ================= LOGO SPRITE ================= -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="logo-badge" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="98" fill="#0B0B0C"/>
+        <circle cx="100" cy="100" r="98" fill="none" stroke="#232527" stroke-width="1"/>
+        <g>
+          <g transform="translate(185.00 100.00) rotate(90.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="182.10" cy="122.00" r="5" fill="#F5F1EC"/>
+          <circle cx="182.10" cy="122.00" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(173.61 142.50) rotate(120.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="160.10" cy="160.10" r="5" fill="#F5F1EC"/>
+          <circle cx="160.10" cy="160.10" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(142.50 173.61) rotate(150.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="122.00" cy="182.10" r="5" fill="#F5F1EC"/>
+          <circle cx="122.00" cy="182.10" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(100.00 185.00) rotate(180.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="78.00" cy="182.10" r="5" fill="#F5F1EC"/>
+          <circle cx="78.00" cy="182.10" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(57.50 173.61) rotate(210.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="39.90" cy="160.10" r="5" fill="#F5F1EC"/>
+          <circle cx="39.90" cy="160.10" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(26.39 142.50) rotate(240.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="17.90" cy="122.00" r="5" fill="#F5F1EC"/>
+          <circle cx="17.90" cy="122.00" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(15.00 100.00) rotate(270.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="17.90" cy="78.00" r="5" fill="#F5F1EC"/>
+          <circle cx="17.90" cy="78.00" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(26.39 57.50) rotate(300.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="39.90" cy="39.90" r="5" fill="#F5F1EC"/>
+          <circle cx="39.90" cy="39.90" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(57.50 26.39) rotate(330.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="78.00" cy="17.90" r="5" fill="#F5F1EC"/>
+          <circle cx="78.00" cy="17.90" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(100.00 15.00) rotate(360.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="122.00" cy="17.90" r="5" fill="#F5F1EC"/>
+          <circle cx="122.00" cy="17.90" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(142.50 26.39) rotate(390.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="160.10" cy="39.90" r="5" fill="#F5F1EC"/>
+          <circle cx="160.10" cy="39.90" r="2.1" fill="#0B0B0C"/>
+          <g transform="translate(173.61 57.50) rotate(420.0)">
+            <rect x="-7" y="-13" width="14" height="26" rx="7" fill="#F5F1EC"/>
+            <circle cx="0" cy="-8.6" r="4.2" fill="#0B0B0C"/>
+            <circle cx="0" cy="8.6" r="4.2" fill="#0B0B0C"/>
+          </g>
+          <circle cx="182.10" cy="78.00" r="5" fill="#F5F1EC"/>
+          <circle cx="182.10" cy="78.00" r="2.1" fill="#0B0B0C"/>
+        </g>
+        <path id="logoArcTop" d="M 43.62 79.48 A 60 60 0 0 1 156.38 79.48" fill="none"/>
+        <text font-size="14" letter-spacing="1.8" font-weight="700" fill="#F5F1EC" font-family="'Barlow Condensed', sans-serif">
+          <textPath href="#logoArcTop" startOffset="50%" text-anchor="middle">MEC&#193;NICOS</textPath>
+        </text>
+        <g transform="translate(100 92) scale(0.7)">
+          <rect x="-46" y="-3.6" width="92" height="7.2" rx="3.6" fill="#F5F1EC"/>
+          <rect x="-53" y="-8" width="11" height="16" rx="2.5" fill="#F5F1EC"/>
+          <rect x="42" y="-8" width="11" height="16" rx="2.5" fill="#F5F1EC"/>
+          <path d="M 22.00 0.00 L 29.63 4.69 L 28.53 9.27 L 19.60 9.99 L 17.80 12.93 L 21.21 21.21 L 17.63 24.27 L 9.99 19.60 L 6.80 20.92 L 4.69 29.63 L 0.00 30.00 L -3.44 21.73 L -6.80 20.92 L -13.62 26.73 L -17.63 24.27 L -15.56 15.56 L -17.80 12.93 L -26.73 13.62 L -28.53 9.27 L -21.73 3.44 L -22.00 0.00 L -29.63 -4.69 L -28.53 -9.27 L -19.60 -9.99 L -17.80 -12.93 L -21.21 -21.21 L -17.63 -24.27 L -9.99 -19.60 L -6.80 -20.92 L -4.69 -29.63 L -0.00 -30.00 L 3.44 -21.73 L 6.80 -20.92 L 13.62 -26.73 L 17.63 -24.27 L 15.56 -15.56 L 17.80 -12.93 L 26.73 -13.62 L 28.53 -9.27 L 21.73 -3.44 Z" fill="#F5F1EC"/>
+          <g transform="translate(-30 33) rotate(20)">
+            <rect x="-2.6" y="-24" width="5.2" height="22" fill="#F5F1EC"/>
+            <rect x="-9" y="-3" width="18" height="21" rx="3" fill="#F5F1EC"/>
+            <rect x="-9" y="1.5" width="18" height="2.4" fill="#0B0B0C"/>
+            <rect x="-9" y="6.5" width="18" height="2.4" fill="#0B0B0C"/>
+          </g>
+          <g transform="translate(30 33) rotate(-20)">
+            <rect x="-1.3" y="13" width="2.6" height="11" fill="#F5F1EC"/>
+            <rect x="-5.5" y="-9" width="11" height="22" rx="1.5" fill="#F5F1EC"/>
+            <rect x="-5.5" y="-4.5" width="11" height="2" fill="#0B0B0C"/>
+            <rect x="-5.5" y="0" width="11" height="2" fill="#0B0B0C"/>
+            <rect x="-5.5" y="4.5" width="11" height="2" fill="#0B0B0C"/>
+            <rect x="-7.5" y="-21" width="15" height="12" rx="1.5" fill="#F5F1EC"/>
+          </g>
+          <g transform="rotate(-38)">
+            <rect x="-4" y="-46" width="8" height="74" rx="4" fill="#F5F1EC"/>
+            <rect x="-16" y="-55" width="32" height="18" rx="4" fill="#F5F1EC"/>
+          </g>
+          <g transform="rotate(38)">
+            <rect x="-4" y="-46" width="8" height="74" rx="4" fill="#F5F1EC"/>
+            <circle cx="0" cy="-50" r="13.5" fill="none" stroke="#F5F1EC" stroke-width="7"/>
+          </g>
+          <circle cx="0" cy="0" r="5" fill="#0B0B0C"/>
+        </g>
+        <text x="100" y="146" text-anchor="middle" font-size="23" font-weight="700" letter-spacing="1.5" fill="#F5F1EC" font-family="'Barlow Condensed', sans-serif">BIKE</text>
+        <text x="100" y="157" text-anchor="middle" font-size="6.4" letter-spacing="1" fill="#A8A29E" font-family="'Barlow Condensed', sans-serif">&mdash; PASI&Oacute;N EN 2 RUEDAS &mdash;</text>
+        <text x="100" y="167" text-anchor="middle" font-size="5.3" letter-spacing="0.4" fill="#6B6560" font-family="'Barlow Condensed', sans-serif">APASEO EL GRANDE, GTO.</text>
+      </symbol>
+    </defs>
+  </svg>
+
+  <a class="skip-link" href="#main">Saltar al contenido principal</a>
+
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="#top" class="logo" aria-label="Mecánicos Biker — Inicio">
+        <svg class="logo-icon" viewBox="0 0 200 200" aria-hidden="true"><use href="#logo-badge"></use></svg>
+        <span class="logo-text">MEC&Aacute;NICOS<strong>BIKER</strong></span>
+      </a>
+
+      <nav class="main-nav" id="mainNav" aria-label="Navegación principal">
+        <ul>
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#productos">Productos</a></li>
+          <li><a href="#paquetes">Paquetes</a></li>
+          <li><a href="#preguntas">Preguntas</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button class="cart-toggle" id="cartToggle" aria-expanded="false" aria-controls="cartPanel" aria-label="Ver carrito de productos">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.2a2 2 0 0 0 2-1.6L20 8H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="20" r="1.4" fill="currentColor"/><circle cx="17" cy="20" r="1.4" fill="currentColor"/></svg>
+          <span class="cart-count" id="cartCount" hidden>0</span>
+        </button>
+        <a href="#contacto" class="btn btn-primary btn-sm">Agendar servicio</a>
+        <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mainNav" aria-label="Abrir menú de navegación">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="cart-overlay" id="cartOverlay" hidden></div>
+  <aside class="cart-panel" id="cartPanel" aria-label="Carrito de productos" aria-hidden="true">
+    <div class="cart-panel-head">
+      <h2>Tu carrito</h2>
+      <button class="cart-close" id="cartClose" aria-label="Cerrar carrito">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <p class="cart-empty" id="cartEmpty">Aún no has agregado productos.</p>
+    </div>
+    <div class="cart-panel-foot">
+      <div class="cart-subtotal">
+        <span>Subtotal</span>
+        <strong id="cartSubtotal">$0 MXN</strong>
+      </div>
+      <a href="#" class="btn btn-primary btn-lg cart-whatsapp" id="cartWhatsapp">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm5.6 14.3c-.2.6-1.3 1.2-1.9 1.3-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.6-.6-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.4.2.5.7 1.8.8 1.9.1.2.1.3 0 .5-.1.2-.2.3-.3.5l-.5.5c-.2.2-.3.4-.1.7.2.3.7 1.2 1.6 1.9 1.1.9 2 1.2 2.3 1.4.3.1.5.1.6-.1.2-.2.6-.7.8-1 .2-.2.4-.2.6-.1l1.7.8c.2.1.4.2.4.4.1.2.1.7-.1 1.3z"/></svg>
+        <span>Pedir por WhatsApp</span>
+      </a>
+      <p class="cart-note">Confirmamos disponibilidad y forma de pago por WhatsApp.</p>
+    </div>
+  </aside>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="hero-bg" aria-hidden="true">
+        <svg class="hero-grid" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" focusable="false">
+          <defs>
+            <pattern id="gridPattern" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M60 0H0V60" fill="none" stroke="rgba(245,241,236,0.05)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="1440" height="900" fill="url(#gridPattern)"/>
+        </svg>
+        <div class="hero-glow"></div>
+      </div>
+
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">Taller especializado en MTB</p>
+          <h1 class="hero-title">TU BICI EN<br>LAS MEJORES<br>MANOS</h1>
+          <p class="hero-subtitle">Servicio de suspensión, frenos, transmisión y mantenimiento general para bicicletas de montaña. Técnicos certificados, refacciones originales y garantía por escrito.</p>
+          <div class="hero-actions">
+            <a href="#contacto" class="btn btn-primary btn-lg">Agendar cita</a>
+            <a href="#servicios" class="btn btn-ghost btn-lg">
+              <span>Ver servicios</span>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="hero-badge" aria-hidden="true">
+          <svg class="hero-badge-svg" viewBox="0 0 200 200"><use href="#logo-badge"></use></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALUE STRIP -->
+    <section class="value-strip" aria-label="Puntos clave del taller">
+      <div class="container value-grid">
+        <div class="value-item">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <div>
+            <strong>Técnicos certificados</strong>
+            <span>Capacitación directa de marca</span>
+          </div>
+        </div>
+        <div class="value-item">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <strong>Refacciones originales</strong>
+            <span>Compatibles con tu modelo exacto</span>
+          </div>
+        </div>
+        <div class="value-item">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true"><path d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V7l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <div>
+            <strong>Garantía por escrito</strong>
+            <span>En mano de obra y refacciones</span>
+          </div>
+        </div>
+        <div class="value-item">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <div>
+            <strong>Servicio express</strong>
+            <span>Afinaciones listas en 24h</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICIOS -->
+    <section class="section" id="servicios" aria-labelledby="servicios-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow eyebrow-dark">Qué hacemos</p>
+          <h2 id="servicios-title">Servicios del taller</h2>
+          <p class="section-desc">Diagnóstico honesto y trabajo especializado en cada sistema de tu bicicleta.</p>
+        </div>
+
+        <div class="service-grid">
+          <article class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true"><path d="M4 20V10M4 10l4-6h8l4 6M4 10h16M20 20V10M9 20v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Servicio de suspensión</h3>
+            <p>Mantenimiento y reconstrucción de horquillas y amortiguadores FOX, RockShox y más.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <h3>Frenos hidráulicos</h3>
+            <p>Purgado, cambio de balatas y ajuste de potencia de frenado para descensos seguros.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true"><circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="18" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M6 18L14 6h4M14 6l4 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Transmisión</h3>
+            <p>Ajuste y cambio de cassette, cadena, desviadores y bujes de pedal.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <h3>Tubeless &amp; llantas</h3>
+            <p>Montaje tubeless, reparación de ponchaduras y balanceo de ruedas.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.5 5.5 21l2-7.5L2 9h7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Afinación general</h3>
+            <p>Revisión completa de 30 puntos: tensión, ajustes, lubricación y torque.</p>
+          </article>
+          <article class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true"><path d="M9 3h6l1 3.5 3 1.7.7-3.7L22 6.5l-3 2.3v3.4l3 2.3-2.3 2-.7-3.7-3 1.7L15 21H9l-1-3.5-3-1.7-.7 3.7L2 17.5l3-2.3V11.8l-3-2.3 2.3-2 .7 3.7 3-1.7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Diagnóstico y presupuesto</h3>
+            <p>Evaluación sin compromiso antes de cualquier trabajo o reparación mayor.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROCESO -->
+    <section class="section section--dark" id="proceso" aria-labelledby="proceso-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Cómo trabajamos</p>
+          <h2 id="proceso-title">De la entrada al taller a la prueba de rodada</h2>
+          <p class="section-desc section-desc--light">Un proceso claro para que sepas exactamente qué pasa con tu bicicleta.</p>
+        </div>
+
+        <div class="process-grid">
+          <div class="process-step">
+            <span class="process-number">01</span>
+            <h3>Diagnóstico</h3>
+            <p>Revisamos tu bici a fondo y detectamos el problema real, no solo el síntoma.</p>
+          </div>
+          <div class="process-step">
+            <span class="process-number">02</span>
+            <h3>Cotización</h3>
+            <p>Te enviamos el presupuesto detallado antes de tocar una sola pieza.</p>
+          </div>
+          <div class="process-step">
+            <span class="process-number">03</span>
+            <h3>Reparación</h3>
+            <p>Trabajo con refacciones originales y herramienta calibrada de marca.</p>
+          </div>
+          <div class="process-step">
+            <span class="process-number">04</span>
+            <h3>Prueba de rodada</h3>
+            <p>Probamos cada bici en pista antes de entregarla, sin excepción.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAQUETES -->
+    <section class="section" id="paquetes" aria-labelledby="paquetes-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow eyebrow-dark">Paquetes</p>
+          <h2 id="paquetes-title">Elige el nivel de servicio</h2>
+          <p class="section-desc">Precios claros, sin sorpresas al final.</p>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="pricing-card">
+            <h3>Básico</h3>
+            <p class="pricing-desc">Mantenimiento preventivo de rutina.</p>
+            <p class="pricing-price">$450<span> MXN</span></p>
+            <ul class="pricing-features">
+              <li>Ajuste de frenos y cambios</li>
+              <li>Lubricación de transmisión</li>
+              <li>Revisión de presión y tornillería</li>
+            </ul>
+            <a href="#contacto" class="btn btn-outline btn-sm">Elegir básico</a>
+          </article>
+
+          <article class="pricing-card pricing-card--featured">
+            <span class="pricing-badge">Más popular</span>
+            <h3>Completo</h3>
+            <p class="pricing-desc">Afinación integral de 30 puntos.</p>
+            <p class="pricing-price">$890<span> MXN</span></p>
+            <ul class="pricing-features">
+              <li>Todo lo del paquete Básico</li>
+              <li>Purgado de frenos hidráulicos</li>
+              <li>Ajuste de suspensión (aire/sag)</li>
+              <li>Limpieza profunda y torque</li>
+            </ul>
+            <a href="#contacto" class="btn btn-primary btn-sm">Elegir completo</a>
+          </article>
+
+          <article class="pricing-card">
+            <h3>Pro Suspensión</h3>
+            <p class="pricing-desc">Reconstrucción completa de suspensión.</p>
+            <p class="pricing-price">$1,650<span> MXN</span></p>
+            <ul class="pricing-features">
+              <li>Desarmado total de horquilla y amortiguador</li>
+              <li>Cambio de aceite y sellos originales</li>
+              <li>Calibración de presión por peso/uso</li>
+            </ul>
+            <a href="#contacto" class="btn btn-outline btn-sm">Elegir Pro</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTOS -->
+    <section class="section section--dark" id="productos" aria-labelledby="productos-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Tienda</p>
+          <h2 id="productos-title">Productos en venta</h2>
+          <p class="section-desc section-desc--light">Refacciones y accesorios que también instalamos en el taller. Agrega al carrito y confirmamos existencia y pago por WhatsApp.</p>
+        </div>
+
+        <div class="product-filters" id="productFilters" role="tablist" aria-label="Filtrar productos por categoría">
+          <button class="filter-chip is-active" data-filter="todos" role="tab" aria-selected="true">Todos</button>
+          <button class="filter-chip" data-filter="componentes" role="tab" aria-selected="false">Componentes</button>
+          <button class="filter-chip" data-filter="accesorios" role="tab" aria-selected="false">Accesorios</button>
+          <button class="filter-chip" data-filter="cuidado" role="tab" aria-selected="false">Cuidado</button>
+          <button class="filter-chip" data-filter="herramientas" role="tab" aria-selected="false">Herramientas</button>
+        </div>
+
+        <div class="product-grid" id="productGrid">
+          <article class="product-card" data-category="accesorios">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><path d="M4 15c0-4.4 3.6-8 8-8s8 3.6 8 8v1H4v-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 16h16M8 16v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Accesorios</span>
+              <h3>Casco MTB ProShield</h3>
+              <p>Ajuste giratorio, ventilación de 18 puertos y certificación de impacto.</p>
+              <div class="product-footer">
+                <span class="product-price">$890<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Casco MTB ProShield" data-price="890">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="accesorios">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><path d="M6 10V6a2 2 0 1 1 4 0v4M10 8V5a2 2 0 1 1 4 0v5M14 9V6a2 2 0 1 1 4 0v6a6 6 0 0 1-6 6H9a5 5 0 0 1-5-5v-2a2 2 0 0 1 2-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Accesorios</span>
+              <h3>Guantes ReinforceGrip</h3>
+              <p>Palma reforzada anti-vibración, dedos táctiles para pantalla.</p>
+              <div class="product-footer">
+                <span class="product-price">$350<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Guantes ReinforceGrip" data-price="350">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="componentes">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="1.5" width="2" height="3" rx="1" fill="currentColor"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Componentes</span>
+              <h3>Cámara MTB 29"</h3>
+              <p>Butilo estándar, válvula Presta 48mm, compatible rodada 29.</p>
+              <div class="product-footer">
+                <span class="product-price">$180<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Cámara MTB 29&quot;" data-price="180">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="componentes">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v2M12 19v2M21 12h-2M5 12H3M18.4 5.6l-1.4 1.4M7 16l-1.4 1.4M18.4 18.4L17 17M7 8 5.6 6.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Componentes</span>
+              <h3>Llanta Tubeless 29x2.3</h3>
+              <p>Compuesto de baja resistencia a la rodadura, refuerzo anti-ponchaduras.</p>
+              <div class="product-footer">
+                <span class="product-price">$1,190<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Llanta Tubeless 29x2.3" data-price="1190">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="componentes">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><rect x="2.5" y="9" width="8" height="6" rx="3" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="9" width="8" height="6" rx="3" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Componentes</span>
+              <h3>Cadena 12 velocidades</h3>
+              <p>Recubrimiento anticorrosivo, compatible con la mayoría de grupos 12V.</p>
+              <div class="product-footer">
+                <span class="product-price">$650<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Cadena 12 velocidades" data-price="650">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="componentes">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="6" r="0.9" fill="currentColor"/><circle cx="12" cy="18" r="0.9" fill="currentColor"/><circle cx="6" cy="12" r="0.9" fill="currentColor"/><circle cx="18" cy="12" r="0.9" fill="currentColor"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Componentes</span>
+              <h3>Pastillas de freno semi-metálicas</h3>
+              <p>Mayor mordida en mojado, compatibles con las principales marcas hidráulicas.</p>
+              <div class="product-footer">
+                <span class="product-price">$280<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Pastillas de freno semi-metálicas" data-price="280">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="cuidado">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><path d="M9 3h6v3l2 2v11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V8l2-2V3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Cuidado</span>
+              <h3>Lubricante de cadena (cera)</h3>
+              <p>Fórmula en cera de baja adherencia al polvo, para clima seco y mixto.</p>
+              <div class="product-footer">
+                <span class="product-price">$220<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Lubricante de cadena (cera)" data-price="220">Agregar</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="product-card" data-category="herramientas">
+            <div class="product-media">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="product-category">Herramientas</span>
+              <h3>Multiherramienta 16 en 1</h3>
+              <p>Llaves Allen, desarmadores y desmontallantas en un solo cuerpo compacto.</p>
+              <div class="product-footer">
+                <span class="product-price">$450<small> MXN</small></span>
+                <button class="btn btn-outline btn-sm add-to-cart" data-name="Multiherramienta 16 en 1" data-price="450">Agregar</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIOS -->
+    <section class="section section--muted" aria-labelledby="testi-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow eyebrow-dark">Testimonios</p>
+          <h2 id="testi-title">Lo que dicen nuestros clientes</h2>
+        </div>
+
+        <div class="testimonial-grid">
+          <figure class="testimonial-card">
+            <div class="stars" aria-label="5 de 5 estrellas">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+            </div>
+            <blockquote>"Le hicieron servicio completo de suspensión a mi bici y quedó como nueva. Explicaron cada cosa que le hicieron."</blockquote>
+            <figcaption>
+              <span class="avatar" aria-hidden="true">JR</span>
+              <div>
+                <strong>Javier Ramírez</strong>
+                <span>Cliente frecuente</span>
+              </div>
+            </figcaption>
+          </figure>
+
+          <figure class="testimonial-card">
+            <div class="stars" aria-label="5 de 5 estrellas">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+            </div>
+            <blockquote>"Cotización clara desde el principio y sin sorpresas al final. Ahora es mi único taller de confianza."</blockquote>
+            <figcaption>
+              <span class="avatar" aria-hidden="true">CM</span>
+              <div>
+                <strong>Carla Mendoza</strong>
+                <span>Ciclista de ruta y MTB</span>
+              </div>
+            </figcaption>
+          </figure>
+
+          <figure class="testimonial-card">
+            <div class="stars" aria-label="4.5 de 5 estrellas">
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+              <svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" opacity="0.35" aria-hidden="true"><path d="M10 1l2.8 5.7 6.2.9-4.5 4.4 1 6.2L10 15l-5.5 3.2 1-6.2L1 7.6l6.2-.9z"/></svg>
+            </div>
+            <blockquote>"El servicio express en verdad cumple: dejé mi bici en la mañana y ya en la tarde estaba lista."</blockquote>
+            <figcaption>
+              <span class="avatar" aria-hidden="true">DH</span>
+              <div>
+                <strong>Diego Herrera</strong>
+                <span>Enduro rider</span>
+              </div>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREGUNTAS FRECUENTES -->
+    <section class="section" id="preguntas" aria-labelledby="faq-title">
+      <div class="container container--narrow">
+        <div class="section-head">
+          <p class="eyebrow eyebrow-dark">Dudas comunes</p>
+          <h2 id="faq-title">Preguntas frecuentes</h2>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>¿Cuánto tiempo tarda un servicio completo?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="faq-answer">
+              <p>Un servicio completo (afinación de 30 puntos) toma entre 24 y 48 horas según carga de taller. El servicio express de ajustes básicos se entrega el mismo día.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>¿Trabajan con todas las marcas de bicicleta?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="faq-answer">
+              <p>Sí. Atendemos cualquier marca y modelo de bicicleta de montaña, y somos centro autorizado para servicio de suspensión FOX.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>¿Dan garantía por el trabajo realizado?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="faq-answer">
+              <p>Todos nuestros servicios incluyen garantía por escrito: 30 días en mano de obra y la garantía del fabricante en refacciones originales.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>¿Puedo ver el diagnóstico antes de autorizar la reparación?</span>
+              <svg class="faq-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="faq-answer">
+              <p>Siempre. Te enviamos la cotización detallada por WhatsApp antes de tocar cualquier pieza, y solo procedemos con tu autorización.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA CONTACTO / AGENDA -->
+    <section class="cta-band" id="contacto" aria-labelledby="cta-title">
+      <div class="container">
+        <div class="cta-copy">
+          <h2 id="cta-title">Agenda el servicio de tu bici</h2>
+          <p>Elige un día y horario disponible, cuéntanos qué necesita tu bici y confirmamos por WhatsApp.</p>
+        </div>
+
+        <div class="booking-grid">
+          <div class="booking-calendar-card">
+            <div class="calendar-head">
+              <button type="button" class="calendar-nav" id="calPrev" aria-label="Mes anterior">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <span class="calendar-month" id="calMonthLabel">Mes</span>
+              <button type="button" class="calendar-nav" id="calNext" aria-label="Mes siguiente">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="calendar-weekdays">
+              <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+            </div>
+            <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Selecciona una fecha"></div>
+            <div class="calendar-legend">
+              <span><i class="legend-dot legend-dot--free"></i> Disponible</span>
+              <span><i class="legend-dot legend-dot--busy"></i> Sin cupo</span>
+              <span><i class="legend-dot legend-dot--closed"></i> Cerrado</span>
+            </div>
+
+            <div class="slot-section">
+              <p class="slot-label" id="slotLabel">Elige primero una fecha</p>
+              <div class="slot-grid" id="slotGrid"></div>
+            </div>
+          </div>
+
+          <form class="cta-form" id="bookingForm" novalidate>
+            <div class="booking-selection" id="bookingSelection" aria-live="polite">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M8 2v4M16 2v4M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span id="bookingSelectionText">Sin fecha ni horario seleccionados</span>
+            </div>
+            <div class="form-row">
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required autocomplete="name">
+            </div>
+            <div class="form-row">
+              <label for="telefono">Teléfono</label>
+              <input type="tel" id="telefono" name="telefono" placeholder="10 dígitos" required autocomplete="tel">
+            </div>
+            <div class="form-row">
+              <label for="servicio">Servicio de interés</label>
+              <select id="servicio" name="servicio">
+                <option value="Servicio de suspensión">Servicio de suspensión</option>
+                <option value="Frenos hidráulicos">Frenos hidráulicos</option>
+                <option value="Transmisión">Transmisión</option>
+                <option value="Afinación general">Afinación general</option>
+                <option value="Diagnóstico">Diagnóstico</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="bookingSubmit" disabled>Confirmar cita por WhatsApp</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a href="#top" class="logo logo--footer" aria-label="Mecánicos Biker — Inicio">
+          <svg class="logo-icon" viewBox="0 0 200 200" aria-hidden="true"><use href="#logo-badge"></use></svg>
+          <span class="logo-text">MEC&Aacute;NICOS<strong>BIKER</strong></span>
+        </a>
+        <p>Taller especializado en mantenimiento y reparación de bicicletas de montaña.</p>
+        <p class="footer-hours">Apaseo el Grande, Guanajuato</p>
+        <p class="footer-hours">Lun&ndash;Vie 9:00&ndash;19:00 · S&aacute;b 9:00&ndash;15:00</p>
+        <div class="social-links" aria-label="Redes sociales">
+          <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M15 8h2V5h-2a4 4 0 0 0-4 4v2H9v3h2v6h3v-6h2.2l.8-3H14V9a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.6"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+          <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M14 3v10.5a3.5 3.5 0 1 1-3-3.46M14 3c.4 2.2 2 3.8 4 4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <nav class="footer-nav" aria-label="Enlaces del pie de página">
+        <div>
+          <h3>Taller</h3>
+          <ul>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#proceso">Proceso</a></li>
+            <li><a href="#paquetes">Paquetes</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Ayuda</h3>
+          <ul>
+            <li><a href="#preguntas">Preguntas frecuentes</a></li>
+            <li><a href="#contacto">Agendar cita</a></li>
+            <li><a href="#">Garantías</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Contacto</h3>
+          <ul>
+            <li><a href="#">WhatsApp</a></li>
+            <li><a href="#">Apaseo el Grande, Gto.</a></li>
+            <li><a href="#">correo@mecanicosbiker.com</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+    <div class="container footer-bottom">
+      <p>© 2026 Mecánicos Biker. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
