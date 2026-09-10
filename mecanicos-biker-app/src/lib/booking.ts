@@ -23,16 +23,12 @@ export const WEEKDAYS_ES = [
   "sábado",
 ];
 
-function hashString(str: string) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
-  }
-  return hash;
-}
-
-export function dateKey(date: Date) {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+/** Zero-padded ISO date (yyyy-mm-dd), matching the format stored in the database. */
+export function isoDate(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 export function startOfDay(date: Date) {
@@ -50,23 +46,6 @@ export function hoursForDate(date: Date): number[] {
   if (day === 0) return [];
   if (day === 6) return [9, 10, 11, 12, 13, 14];
   return [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
-}
-
-/** Deterministic pseudo-random "occupied" simulation — stable per date+hour, not truly random. */
-export function isHourBusy(date: Date, hour: number) {
-  const seed = hashString(`${dateKey(date)}-${hour}`);
-  return seed % 100 < 32;
-}
-
-export function dayHasFreeSlot(date: Date, today: Date) {
-  const hours = hoursForDate(date);
-  if (hours.length === 0) return false;
-  const isToday = date.getTime() === today.getTime();
-  const nowHour = new Date().getHours();
-  return hours.some((h) => {
-    if (isToday && h <= nowHour) return false;
-    return !isHourBusy(date, h);
-  });
 }
 
 export function formatHour(hour: number) {

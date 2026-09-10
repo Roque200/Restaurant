@@ -50,6 +50,16 @@ const NAV = [
       </>
     ),
   },
+  {
+    href: "/admin/escanear",
+    label: "Escanear",
+    icon: (
+      <>
+        <path d="M4 8V5a1 1 0 0 1 1-1h3M20 8V5a1 1 0 0 0-1-1h-3M4 16v3a1 1 0 0 0 1 1h3M20 16v3a1 1 0 0 1-1 1h-3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M7 12h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </>
+    ),
+  },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {

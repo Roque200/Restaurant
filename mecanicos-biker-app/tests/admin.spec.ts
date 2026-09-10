@@ -50,7 +50,7 @@ test.describe("Panel administrativo", () => {
     await expect(page).toHaveURL(/\/admin\/citas/);
     const firstStatusSelect = page.locator("table tbody tr").first().locator("select");
     await firstStatusSelect.selectOption("completada");
-    await expect(page.locator("table tbody tr").first().locator("span")).toHaveText("Completada");
+    await expect(page.locator("table tbody tr").first().locator("td").nth(5).locator("span")).toHaveText("Completada");
 
     // Filtro por estado
     await page.getByRole("button", { name: "Cancelada" }).click();
@@ -68,11 +68,14 @@ test.describe("Panel administrativo", () => {
     await expect(page).toHaveURL(/\/admin\/productos/);
     await page.getByRole("button", { name: "Nuevo producto" }).click();
     await page.getByLabel("Nombre").fill("Cámara de prueba");
+    await page.getByLabel("Descripción").fill("Cámara de prueba para validar el alta de productos.");
     await page.getByLabel("Precio (MXN)").fill("199");
     await page.getByLabel("Stock", { exact: true }).fill("10");
     await page.getByLabel(/Alertar cuando/).fill("3");
     await page.getByRole("button", { name: "Agregar" }).click();
-    await expect(page.getByText("Cámara de prueba")).toBeVisible();
+    // Scoped to the table cell specifically — the modal's own "Descripción"
+    // textarea still holds the same text for a moment during its exit animation.
+    await expect(page.getByRole("cell", { name: "Cámara de prueba", exact: true })).toBeVisible();
 
     // Clientes: buscar
     await page.getByRole("link", { name: "Clientes" }).click();

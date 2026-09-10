@@ -2,47 +2,32 @@ import Link from "next/link";
 import { StatCard } from "@/components/admin/StatCard";
 import { RevenueChart } from "@/components/admin/RevenueChart";
 import { AppointmentStatusBadge, OrderStatusBadge } from "@/components/admin/StatusBadge";
-import {
-  APPOINTMENTS,
-  APPOINTMENT_STATUS_LABEL,
-  ORDERS,
-  ORDER_STATUS_LABEL,
-  PRODUCTS,
-  REVENUE_TREND,
-  orderTotal,
-} from "@/lib/admin-data";
+import { APPOINTMENT_STATUS_LABEL, ORDER_STATUS_LABEL, orderTotal } from "@/lib/admin-data";
+import { getDashboardStats } from "@/lib/db";
 
-const TODAY = "2026-09-09";
+export const dynamic = "force-dynamic";
 
 export default function AdminDashboardPage() {
-  const todayAppointments = APPOINTMENTS.filter((a) => a.date === TODAY);
-  const pendingOrders = ORDERS.filter((o) => o.status === "pendiente");
-  const lowStock = PRODUCTS.filter((p) => p.stock <= p.lowStockThreshold);
-  const monthRevenue = REVENUE_TREND.reduce((a, b) => a + b, 0);
-  const recentOrders = [...ORDERS].slice(0, 5);
-  const upcoming = [...APPOINTMENTS]
-    .filter((a) => a.status !== "cancelada" && a.status !== "completada")
-    .sort((a, b) => (a.date + a.hour).localeCompare(b.date + b.hour))
-    .slice(0, 5);
+  const today = new Date().toISOString().slice(0, 10);
+  const { todayAppointments, pendingOrders, lowStock, monthRevenue, revenueTrend, recentOrders, upcoming } =
+    getDashboardStats(today);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Citas de hoy"
-          value={String(todayAppointments.length)}
-          trend={{ value: "2 vs. ayer", positive: true }}
+          value={String(todayAppointments)}
           icon={<path d="M3 10h18M8 3v4M16 3v4M5 6h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />}
         />
         <StatCard
           label="Ingresos (14 días)"
           value={`$${monthRevenue.toLocaleString("es-MX")}`}
-          trend={{ value: "12.4%", positive: true }}
           icon={<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />}
         />
         <StatCard
           label="Pedidos pendientes"
-          value={String(pendingOrders.length)}
+          value={String(pendingOrders)}
           icon={<path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.2a2 2 0 0 0 2-1.6L20 8H6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />}
         />
         <StatCard
@@ -57,9 +42,9 @@ export default function AdminDashboardPage() {
         <div className="rounded-2xl border border-black/5 bg-white p-6 xl:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-[15px] font-semibold text-[#1d1d1f]">Ingresos — últimos 14 días</h2>
-            <span className="text-[12.5px] text-muted">Servicio + tienda</span>
+            <span className="text-[12.5px] text-muted">Tienda en línea</span>
           </div>
-          <RevenueChart data={REVENUE_TREND} />
+          <RevenueChart data={revenueTrend} />
         </div>
 
         <div className="rounded-2xl border border-black/5 bg-white p-6">
@@ -92,6 +77,7 @@ export default function AdminDashboardPage() {
             </Link>
           </div>
           <ul className="flex flex-col divide-y divide-black/5">
+            {upcoming.length === 0 && <p className="text-[13px] text-muted">No hay citas próximas.</p>}
             {upcoming.map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
@@ -114,6 +100,7 @@ export default function AdminDashboardPage() {
             </Link>
           </div>
           <ul className="flex flex-col divide-y divide-black/5">
+            {recentOrders.length === 0 && <p className="text-[13px] text-muted">Aún no hay pedidos.</p>}
             {recentOrders.map((o) => (
               <li key={o.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">

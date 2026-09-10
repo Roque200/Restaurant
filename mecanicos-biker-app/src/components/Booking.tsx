@@ -1,20 +1,20 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   MONTHS_ES,
   WEEKDAYS_ES,
-  dayHasFreeSlot,
   formatHour,
   formatLongDate,
   formatSelectionSummary,
   hoursForDate,
-  isHourBusy,
   isSunday,
+  isoDate,
   startOfDay,
 } from "@/lib/booking";
 import { waLink } from "@/lib/whatsapp";
+import { getMonthAvailability, bookAppointment } from "@/lib/actions/appointments";
 import { Reveal } from "./Reveal";
 
 const SERVICES = [
@@ -25,6 +25,8 @@ const SERVICES = [
   "Diagnóstico",
 ];
 
+type BookingResult = { id: string; url: string; qrDataUrl: string };
+
 export function Booking() {
   const today = useMemo(() => startOfDay(new Date()), []);
   const minMonth = useMemo(() => new Date(today.getFullYear(), today.getMonth(), 1), [today]);
@@ -33,6 +35,10 @@ export function Booking() {
   const [viewMonth, setViewMonth] = useState(minMonth);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
+  const [busyByDate, setBusyByDate] = useState<Record<string, string[]>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [result, setResult] = useState<BookingResult | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const days = useMemo(() => {
@@ -46,16 +52,39 @@ export function Booking() {
     return cells;
   }, [viewMonth]);
 
+  const refreshAvailability = useCallback(() => {
+    const from = isoDate(new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1));
+    const to = isoDate(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0));
+    return getMonthAvailability(from, to).then(setBusyByDate);
+  }, [viewMonth]);
+
+  useEffect(() => {
+    refreshAvailability();
+  }, [refreshAvailability]);
+
   const slots = selectedDate ? hoursForDate(selectedDate) : [];
   const isSelectedToday = selectedDate?.getTime() === today.getTime();
   const nowHour = new Date().getHours();
+  const busyForSelected = selectedDate ? (busyByDate[isoDate(selectedDate)] ?? []) : [];
+
+  function dayHasFreeSlot(date: Date) {
+    const hours = hoursForDate(date);
+    if (hours.length === 0) return false;
+    const isToday = date.getTime() === today.getTime();
+    const busy = busyByDate[isoDate(date)] ?? [];
+    return hours.some((h) => {
+      if (isToday && h <= nowHour) return false;
+      return !busy.includes(formatHour(h));
+    });
+  }
 
   function selectDate(date: Date) {
     setSelectedDate(date);
     setSelectedHour(null);
+    setSubmitError(null);
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!selectedDate || selectedHour === null || !formRef.current) return;
 
@@ -69,15 +98,43 @@ export function Booking() {
     const telefono = (form.elements.namedItem("telefono") as HTMLInputElement).value.trim();
     const servicio = (form.elements.namedItem("servicio") as HTMLSelectElement).value;
 
+    setSubmitting(true);
+    setSubmitError(null);
+    const res = await bookAppointment({
+      customer: nombre,
+      phone: telefono,
+      service: servicio,
+      date: isoDate(selectedDate),
+      hour: formatHour(selectedHour),
+    });
+    setSubmitting(false);
+
+    if (!res.ok) {
+      setSubmitError(res.error);
+      refreshAvailability();
+      setSelectedHour(null);
+      return;
+    }
+    await refreshAvailability();
+
     const message =
-      "Hola, quiero agendar una cita:\n" +
+      "Hola, agendé una cita:\n" +
       `- Nombre: ${nombre}\n` +
       `- Teléfono: ${telefono}\n` +
       `- Servicio: ${servicio}\n` +
       `- Fecha: ${formatLongDate(selectedDate)}\n` +
-      `- Hora: ${formatHour(selectedHour)} hrs`;
-
+      `- Hora: ${formatHour(selectedHour)} hrs\n` +
+      `- Folio: ${res.id}\n` +
+      `- Ver mi cita: ${res.url}`;
     window.open(waLink(message), "_blank", "noopener");
+    setResult({ id: res.id, url: res.url, qrDataUrl: res.qrDataUrl });
+  }
+
+  function bookAnother() {
+    setResult(null);
+    setSelectedDate(null);
+    setSelectedHour(null);
+    formRef.current?.reset();
   }
 
   const canGoPrev = viewMonth.getTime() > minMonth.getTime();
@@ -139,7 +196,7 @@ export function Booking() {
                 if (!date) return <span key={i} />;
                 const closed = isSunday(date);
                 const past = date.getTime() < today.getTime();
-                const hasFree = !closed && !past && dayHasFreeSlot(date, today);
+                const hasFree = !closed && !past && dayHasFreeSlot(date);
                 const isToday = date.getTime() === today.getTime();
                 const isSelected = selectedDate?.getTime() === date.getTime();
                 const disabled = past || closed || !hasFree;
@@ -194,7 +251,7 @@ export function Booking() {
                     >
                       {slots.map((hour) => {
                         const pastHour = isSelectedToday && hour <= nowHour;
-                        const busy = pastHour || isHourBusy(selectedDate, hour);
+                        const busy = pastHour || busyForSelected.includes(formatHour(hour));
                         const isSelected = selectedHour === hour;
                         return (
                           <button
@@ -222,70 +279,106 @@ export function Booking() {
           </Reveal>
 
           <Reveal delay={0.1}>
-            <form
-              ref={formRef}
-              onSubmit={handleSubmit}
-              className="flex h-full flex-col gap-4 rounded-3xl bg-white p-6 sm:p-8"
-            >
-              <div className="flex items-center gap-2.5 rounded-xl bg-accent/10 px-4 py-3 text-[13.5px] font-medium text-accent-dark">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" className="shrink-0">
-                  <path d="M8 2v4M16 2v4M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span>
-                  {selectedDate && selectedHour !== null
-                    ? formatSelectionSummary(selectedDate, selectedHour)
-                    : selectedDate
-                      ? "Elige un horario disponible"
-                      : "Sin fecha ni horario seleccionados"}
+            {result ? (
+              <div className="flex h-full flex-col items-center gap-4 rounded-3xl bg-white p-6 text-center sm:p-8">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </span>
-              </div>
-
-              <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
-                Nombre
-                <input
-                  name="nombre"
-                  type="text"
-                  required
-                  placeholder="Tu nombre"
-                  autoComplete="name"
-                  className="h-11 rounded-xl border border-black/10 px-3.5 text-[14.5px] text-[#1d1d1f] outline-none transition-colors focus:border-accent"
-                />
-              </label>
-
-              <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
-                Teléfono
-                <input
-                  name="telefono"
-                  type="tel"
-                  required
-                  placeholder="10 dígitos"
-                  autoComplete="tel"
-                  className="h-11 rounded-xl border border-black/10 px-3.5 text-[14.5px] text-[#1d1d1f] outline-none transition-colors focus:border-accent"
-                />
-              </label>
-
-              <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
-                Servicio de interés
-                <select
-                  name="servicio"
-                  className="h-11 rounded-xl border border-black/10 px-3.5 text-[14.5px] text-[#1d1d1f] outline-none transition-colors focus:border-accent"
+                <div>
+                  <h3 className="text-lg font-semibold text-[#1d1d1f]">¡Cita agendada, folio {result.id}!</h3>
+                  <p className="mt-1 text-[13.5px] text-muted">
+                    Guarda este código QR — lo escaneamos al llegar al taller para registrar tu cita al instante.
+                  </p>
+                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={result.qrDataUrl} alt="Código QR de tu cita" className="h-40 w-40" />
+                <a
+                  href={result.url}
+                  target="_blank"
+                  rel="noopener"
+                  className="text-[13px] font-semibold text-accent hover:underline"
                 >
-                  {SERVICES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <button
-                type="submit"
-                disabled={!selectedDate || selectedHour === null}
-                className="mt-2 flex h-12 items-center justify-center rounded-full bg-accent text-[15px] font-semibold text-white transition-transform enabled:hover:scale-[1.02] enabled:active:scale-[0.98] disabled:opacity-40"
+                  Ver mi cita
+                </a>
+                <button
+                  onClick={bookAnother}
+                  className="mt-2 h-10 rounded-full border border-black/10 px-5 text-[13.5px] font-semibold text-[#1d1d1f] hover:bg-black/5"
+                >
+                  Agendar otra cita
+                </button>
+              </div>
+            ) : (
+              <form
+                ref={formRef}
+                onSubmit={handleSubmit}
+                className="flex h-full flex-col gap-4 rounded-3xl bg-white p-6 sm:p-8"
               >
-                Confirmar cita por WhatsApp
-              </button>
-            </form>
+                <div className="flex items-center gap-2.5 rounded-xl bg-accent/10 px-4 py-3 text-[13.5px] font-medium text-accent-dark">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" className="shrink-0">
+                    <path d="M8 2v4M16 2v4M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span>
+                    {selectedDate && selectedHour !== null
+                      ? formatSelectionSummary(selectedDate, selectedHour)
+                      : selectedDate
+                        ? "Elige un horario disponible"
+                        : "Sin fecha ni horario seleccionados"}
+                  </span>
+                </div>
+
+                {submitError && (
+                  <p className="rounded-xl bg-red-50 px-4 py-3 text-[13px] font-medium text-red-600">{submitError}</p>
+                )}
+
+                <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
+                  Nombre
+                  <input
+                    name="nombre"
+                    type="text"
+                    required
+                    placeholder="Tu nombre"
+                    autoComplete="name"
+                    className="h-11 rounded-xl border border-black/10 px-3.5 text-[14.5px] text-[#1d1d1f] outline-none transition-colors focus:border-accent"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
+                  Teléfono
+                  <input
+                    name="telefono"
+                    type="tel"
+                    required
+                    placeholder="10 dígitos"
+                    autoComplete="tel"
+                    className="h-11 rounded-xl border border-black/10 px-3.5 text-[14.5px] text-[#1d1d1f] outline-none transition-colors focus:border-accent"
+                  />
+                </label>
+
+                <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
+                  Servicio de interés
+                  <select
+                    name="servicio"
+                    className="h-11 rounded-xl border border-black/10 px-3.5 text-[14.5px] text-[#1d1d1f] outline-none transition-colors focus:border-accent"
+                  >
+                    {SERVICES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={!selectedDate || selectedHour === null || submitting}
+                  className="mt-2 flex h-12 items-center justify-center rounded-full bg-accent text-[15px] font-semibold text-white transition-transform enabled:hover:scale-[1.02] enabled:active:scale-[0.98] disabled:opacity-40"
+                >
+                  {submitting ? "Agendando…" : "Confirmar cita por WhatsApp"}
+                </button>
+              </form>
+            )}
           </Reveal>
         </div>
       </div>
