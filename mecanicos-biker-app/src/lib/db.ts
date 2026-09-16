@@ -2,7 +2,6 @@ import Database from "better-sqlite3";
 import path from "node:path";
 import crypto from "node:crypto";
 import fs from "node:fs";
-import { REWARD_THRESHOLD } from "./rewards";
 
 export type AppointmentStatus = "pendiente" | "confirmada" | "en_proceso" | "completada" | "cancelada";
 export type OrderStatus = "pendiente" | "pagado" | "entregado" | "cancelado";
@@ -55,6 +54,14 @@ export type Customer = {
   rewardPoints: number;
   rewardLifetime: number;
   rewardsRedeemed: number;
+  lastReward: string | null;
+};
+
+export type RewardItem = {
+  id: string;
+  name: string;
+  pointsCost: number;
+  active: boolean;
 };
 
 // Next.js hot-reloads modules in dev, which would otherwise reopen the file
@@ -138,6 +145,13 @@ function migrate(db: Database.Database) {
       price INTEGER NOT NULL,
       qty INTEGER NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS reward_items (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      points_cost INTEGER NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1
+    );
   `);
 
   // Added after the initial release — ensureColumn keeps existing local
@@ -145,6 +159,7 @@ function migrate(db: Database.Database) {
   ensureColumn(db, "customers", "reward_points", "INTEGER NOT NULL DEFAULT 0");
   ensureColumn(db, "customers", "reward_lifetime", "INTEGER NOT NULL DEFAULT 0");
   ensureColumn(db, "customers", "rewards_redeemed", "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn(db, "customers", "last_reward", "TEXT");
 }
 
 function ensureColumn(db: Database.Database, table: string, column: string, definition: string) {
@@ -162,7 +177,10 @@ function seedIfEmpty(db: Database.Database) {
     "INSERT INTO products (id, name, category, description, price, stock, low_stock_threshold) VALUES (@id, @name, @category, @description, @price, @stock, @lowStockThreshold)",
   );
   const insertCustomer = db.prepare(
-    "INSERT INTO customers (id, name, phone, email, visits, total_spent, last_visit, reward_points, reward_lifetime, rewards_redeemed) VALUES (@id, @name, @phone, @email, @visits, @totalSpent, @lastVisit, @rewardPoints, @rewardLifetime, @rewardsRedeemed)",
+    "INSERT INTO customers (id, name, phone, email, visits, total_spent, last_visit, reward_points, reward_lifetime, rewards_redeemed, last_reward) VALUES (@id, @name, @phone, @email, @visits, @totalSpent, @lastVisit, @rewardPoints, @rewardLifetime, @rewardsRedeemed, @lastReward)",
+  );
+  const insertRewardItem = db.prepare(
+    "INSERT INTO reward_items (id, name, points_cost, active) VALUES (@id, @name, @pointsCost, @active)",
   );
   const insertAppointment = db.prepare(
     "INSERT INTO appointments (id, qr_token, customer, phone, service, date, hour, status) VALUES (@id, @qrToken, @customer, @phone, @service, @date, @hour, @status)",
@@ -189,15 +207,22 @@ function seedIfEmpty(db: Database.Database) {
     for (const p of products) insertProduct.run(p);
 
     const customers: Customer[] = [
-      { id: "CL-01", name: "Javier Ramírez", phone: "461 100 2233", email: "javier.ramirez@mail.com", visits: 6, totalSpent: 5420, lastVisit: "2026-09-09", rewardPoints: 4, rewardLifetime: 9, rewardsRedeemed: 1 },
-      { id: "CL-02", name: "Carla Mendoza", phone: "461 118 4455", email: "carla.m@mail.com", visits: 3, totalSpent: 2180, lastVisit: "2026-09-09", rewardPoints: 2, rewardLifetime: 2, rewardsRedeemed: 0 },
-      { id: "CL-03", name: "Diego Herrera", phone: "461 122 7788", email: null, visits: 9, totalSpent: 8950, lastVisit: "2026-09-08", rewardPoints: 3, rewardLifetime: 13, rewardsRedeemed: 2 },
-      { id: "CL-04", name: "Laura Pineda", phone: "461 130 9911", email: "laura.pineda@mail.com", visits: 1, totalSpent: 890, lastVisit: "2026-09-11", rewardPoints: 1, rewardLifetime: 1, rewardsRedeemed: 0 },
-      { id: "CL-05", name: "Mariana Ríos", phone: "461 144 2200", email: null, visits: 4, totalSpent: 3100, lastVisit: "2026-09-11", rewardPoints: 3, rewardLifetime: 3, rewardsRedeemed: 0 },
-      { id: "CL-06", name: "Roberto Salas", phone: "461 155 3311", email: "r.salas@mail.com", visits: 12, totalSpent: 14200, lastVisit: "2026-09-06", rewardPoints: 1, rewardLifetime: 26, rewardsRedeemed: 5 },
-      { id: "CL-07", name: "Ana Torres", phone: "461 166 4422", email: null, visits: 2, totalSpent: 2680, lastVisit: "2026-09-07", rewardPoints: 2, rewardLifetime: 2, rewardsRedeemed: 0 },
+      { id: "CL-01", name: "Javier Ramírez", phone: "461 100 2233", email: "javier.ramirez@mail.com", visits: 6, totalSpent: 5420, lastVisit: "2026-09-09", rewardPoints: 4, rewardLifetime: 9, rewardsRedeemed: 1, lastReward: "10% de descuento" },
+      { id: "CL-02", name: "Carla Mendoza", phone: "461 118 4455", email: "carla.m@mail.com", visits: 3, totalSpent: 2180, lastVisit: "2026-09-09", rewardPoints: 2, rewardLifetime: 2, rewardsRedeemed: 0, lastReward: null },
+      { id: "CL-03", name: "Diego Herrera", phone: "461 122 7788", email: null, visits: 9, totalSpent: 8950, lastVisit: "2026-09-08", rewardPoints: 3, rewardLifetime: 13, rewardsRedeemed: 2, lastReward: "Afinación general gratis" },
+      { id: "CL-04", name: "Laura Pineda", phone: "461 130 9911", email: "laura.pineda@mail.com", visits: 1, totalSpent: 890, lastVisit: "2026-09-11", rewardPoints: 1, rewardLifetime: 1, rewardsRedeemed: 0, lastReward: null },
+      { id: "CL-05", name: "Mariana Ríos", phone: "461 144 2200", email: null, visits: 4, totalSpent: 3100, lastVisit: "2026-09-11", rewardPoints: 3, rewardLifetime: 3, rewardsRedeemed: 0, lastReward: null },
+      { id: "CL-06", name: "Roberto Salas", phone: "461 155 3311", email: "r.salas@mail.com", visits: 12, totalSpent: 14200, lastVisit: "2026-09-06", rewardPoints: 1, rewardLifetime: 26, rewardsRedeemed: 5, lastReward: "Cambio de cadena gratis" },
+      { id: "CL-07", name: "Ana Torres", phone: "461 166 4422", email: null, visits: 2, totalSpent: 2680, lastVisit: "2026-09-07", rewardPoints: 2, rewardLifetime: 2, rewardsRedeemed: 0, lastReward: null },
     ];
     for (const c of customers) insertCustomer.run(c);
+
+    const rewardItems: RewardItem[] = [
+      { id: "RW-01", name: "10% de descuento en tu próxima visita", pointsCost: 3, active: true },
+      { id: "RW-02", name: "Cambio de cadena gratis", pointsCost: 5, active: true },
+      { id: "RW-03", name: "Afinación general gratis", pointsCost: 8, active: true },
+    ];
+    for (const r of rewardItems) insertRewardItem.run({ ...r, active: r.active ? 1 : 0 });
 
     const appointments: Omit<Appointment, "checkedInAt" | "notes">[] = [
       { id: "C-1042", qrToken: crypto.randomUUID(), customer: "Javier Ramírez", phone: "461 100 2233", service: "Servicio de suspensión", date: "2026-09-10", hour: "09:00", status: "confirmada" },
@@ -227,6 +252,7 @@ function seedIfEmpty(db: Database.Database) {
     setCounter.run("orders", 3305);
     setCounter.run("products", 8);
     setCounter.run("customers", 7);
+    setCounter.run("reward_items", 3);
   });
 
   seed();
@@ -299,7 +325,7 @@ export function deleteProduct(id: string) {
 
 function rowToCustomer(row: {
   id: string; name: string; phone: string; email: string | null; visits: number; total_spent: number; last_visit: string;
-  reward_points: number; reward_lifetime: number; rewards_redeemed: number;
+  reward_points: number; reward_lifetime: number; rewards_redeemed: number; last_reward: string | null;
 }): Customer {
   return {
     id: row.id,
@@ -312,6 +338,7 @@ function rowToCustomer(row: {
     rewardPoints: row.reward_points,
     rewardLifetime: row.reward_lifetime,
     rewardsRedeemed: row.rewards_redeemed,
+    lastReward: row.last_reward,
   };
 }
 
@@ -325,20 +352,56 @@ export function getCustomer(id: string): Customer | null {
   return row ? rowToCustomer(row as Parameters<typeof rowToCustomer>[0]) : null;
 }
 
-export class NotEnoughPointsError extends Error {}
+// ---------- Reward catalog ----------
 
-/** Canjea una recompensa: descuenta REWARD_THRESHOLD puntos y suma una al contador de canjeadas. */
-export function redeemReward(customerId: string): Customer {
+function rowToRewardItem(row: { id: string; name: string; points_cost: number; active: number }): RewardItem {
+  return { id: row.id, name: row.name, pointsCost: row.points_cost, active: row.active === 1 };
+}
+
+export function listRewardItems(): RewardItem[] {
+  const rows = getDb().prepare("SELECT * FROM reward_items ORDER BY points_cost ASC").all();
+  return (rows as Parameters<typeof rowToRewardItem>[0][]).map(rowToRewardItem);
+}
+
+export function createRewardItem(input: { name: string; pointsCost: number }): RewardItem {
+  const id = `RW-${String(nextSeq("reward_items", 3)).padStart(2, "0")}`;
+  getDb()
+    .prepare("INSERT INTO reward_items (id, name, points_cost, active) VALUES (?, ?, ?, 1)")
+    .run(id, input.name, input.pointsCost);
+  return { id, name: input.name, pointsCost: input.pointsCost, active: true };
+}
+
+export function updateRewardItem(id: string, input: { name: string; pointsCost: number; active: boolean }) {
+  getDb()
+    .prepare("UPDATE reward_items SET name = ?, points_cost = ?, active = ? WHERE id = ?")
+    .run(input.name, input.pointsCost, input.active ? 1 : 0, id);
+}
+
+export function deleteRewardItem(id: string) {
+  getDb().prepare("DELETE FROM reward_items WHERE id = ?").run(id);
+}
+
+export class NotEnoughPointsError extends Error {}
+export class RewardItemNotFoundError extends Error {}
+
+/** Canjea una recompensa del catálogo: descuenta su costo en puntos y registra cuál fue. */
+export function redeemReward(customerId: string, rewardItemId: string): Customer {
   const db = getDb();
-  const row = db.prepare("SELECT reward_points FROM customers WHERE id = ?").get(customerId) as
+  const item = db.prepare("SELECT * FROM reward_items WHERE id = ?").get(rewardItemId) as
+    | { name: string; points_cost: number }
+    | undefined;
+  if (!item) {
+    throw new RewardItemNotFoundError("Ese premio ya no existe en el catálogo.");
+  }
+  const customer = db.prepare("SELECT reward_points FROM customers WHERE id = ?").get(customerId) as
     | { reward_points: number }
     | undefined;
-  if (!row || row.reward_points < REWARD_THRESHOLD) {
-    throw new NotEnoughPointsError("El cliente no tiene suficientes puntos para canjear.");
+  if (!customer || customer.reward_points < item.points_cost) {
+    throw new NotEnoughPointsError("El cliente no tiene suficientes puntos para canjear ese premio.");
   }
   db.prepare(
-    "UPDATE customers SET reward_points = reward_points - ?, rewards_redeemed = rewards_redeemed + 1 WHERE id = ?",
-  ).run(REWARD_THRESHOLD, customerId);
+    "UPDATE customers SET reward_points = reward_points - ?, rewards_redeemed = rewards_redeemed + 1, last_reward = ? WHERE id = ?",
+  ).run(item.points_cost, item.name, customerId);
   return getCustomer(customerId)!;
 }
 
