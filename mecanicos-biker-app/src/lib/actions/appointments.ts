@@ -63,4 +63,5 @@ export async function updateAppointmentStatus(id: string, status: AppointmentSta
   dbUpdateAppointmentStatus(id, status);
   revalidatePath("/admin/citas");
   revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/clientes");
 }

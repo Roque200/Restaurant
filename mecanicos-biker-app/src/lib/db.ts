@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import path from "node:path";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import { REWARD_THRESHOLD } from "./rewards";
 
 export type AppointmentStatus = "pendiente" | "confirmada" | "en_proceso" | "completada" | "cancelada";
 export type OrderStatus = "pendiente" | "pagado" | "entregado" | "cancelado";
@@ -51,6 +52,9 @@ export type Customer = {
   visits: number;
   totalSpent: number;
   lastVisit: string;
+  rewardPoints: number;
+  rewardLifetime: number;
+  rewardsRedeemed: number;
 };
 
 // Next.js hot-reloads modules in dev, which would otherwise reopen the file
@@ -135,6 +139,19 @@ function migrate(db: Database.Database) {
       qty INTEGER NOT NULL
     );
   `);
+
+  // Added after the initial release — ensureColumn keeps existing local
+  // databases (which predate these columns) working without a manual reset.
+  ensureColumn(db, "customers", "reward_points", "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn(db, "customers", "reward_lifetime", "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn(db, "customers", "rewards_redeemed", "INTEGER NOT NULL DEFAULT 0");
+}
+
+function ensureColumn(db: Database.Database, table: string, column: string, definition: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!columns.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
 }
 
 function seedIfEmpty(db: Database.Database) {
@@ -145,7 +162,7 @@ function seedIfEmpty(db: Database.Database) {
     "INSERT INTO products (id, name, category, description, price, stock, low_stock_threshold) VALUES (@id, @name, @category, @description, @price, @stock, @lowStockThreshold)",
   );
   const insertCustomer = db.prepare(
-    "INSERT INTO customers (id, name, phone, email, visits, total_spent, last_visit) VALUES (@id, @name, @phone, @email, @visits, @totalSpent, @lastVisit)",
+    "INSERT INTO customers (id, name, phone, email, visits, total_spent, last_visit, reward_points, reward_lifetime, rewards_redeemed) VALUES (@id, @name, @phone, @email, @visits, @totalSpent, @lastVisit, @rewardPoints, @rewardLifetime, @rewardsRedeemed)",
   );
   const insertAppointment = db.prepare(
     "INSERT INTO appointments (id, qr_token, customer, phone, service, date, hour, status) VALUES (@id, @qrToken, @customer, @phone, @service, @date, @hour, @status)",
@@ -172,13 +189,13 @@ function seedIfEmpty(db: Database.Database) {
     for (const p of products) insertProduct.run(p);
 
     const customers: Customer[] = [
-      { id: "CL-01", name: "Javier Ramírez", phone: "461 100 2233", email: "javier.ramirez@mail.com", visits: 6, totalSpent: 5420, lastVisit: "2026-09-09" },
-      { id: "CL-02", name: "Carla Mendoza", phone: "461 118 4455", email: "carla.m@mail.com", visits: 3, totalSpent: 2180, lastVisit: "2026-09-09" },
-      { id: "CL-03", name: "Diego Herrera", phone: "461 122 7788", email: null, visits: 9, totalSpent: 8950, lastVisit: "2026-09-08" },
-      { id: "CL-04", name: "Laura Pineda", phone: "461 130 9911", email: "laura.pineda@mail.com", visits: 1, totalSpent: 890, lastVisit: "2026-09-11" },
-      { id: "CL-05", name: "Mariana Ríos", phone: "461 144 2200", email: null, visits: 4, totalSpent: 3100, lastVisit: "2026-09-11" },
-      { id: "CL-06", name: "Roberto Salas", phone: "461 155 3311", email: "r.salas@mail.com", visits: 12, totalSpent: 14200, lastVisit: "2026-09-06" },
-      { id: "CL-07", name: "Ana Torres", phone: "461 166 4422", email: null, visits: 2, totalSpent: 2680, lastVisit: "2026-09-07" },
+      { id: "CL-01", name: "Javier Ramírez", phone: "461 100 2233", email: "javier.ramirez@mail.com", visits: 6, totalSpent: 5420, lastVisit: "2026-09-09", rewardPoints: 4, rewardLifetime: 9, rewardsRedeemed: 1 },
+      { id: "CL-02", name: "Carla Mendoza", phone: "461 118 4455", email: "carla.m@mail.com", visits: 3, totalSpent: 2180, lastVisit: "2026-09-09", rewardPoints: 2, rewardLifetime: 2, rewardsRedeemed: 0 },
+      { id: "CL-03", name: "Diego Herrera", phone: "461 122 7788", email: null, visits: 9, totalSpent: 8950, lastVisit: "2026-09-08", rewardPoints: 3, rewardLifetime: 13, rewardsRedeemed: 2 },
+      { id: "CL-04", name: "Laura Pineda", phone: "461 130 9911", email: "laura.pineda@mail.com", visits: 1, totalSpent: 890, lastVisit: "2026-09-11", rewardPoints: 1, rewardLifetime: 1, rewardsRedeemed: 0 },
+      { id: "CL-05", name: "Mariana Ríos", phone: "461 144 2200", email: null, visits: 4, totalSpent: 3100, lastVisit: "2026-09-11", rewardPoints: 3, rewardLifetime: 3, rewardsRedeemed: 0 },
+      { id: "CL-06", name: "Roberto Salas", phone: "461 155 3311", email: "r.salas@mail.com", visits: 12, totalSpent: 14200, lastVisit: "2026-09-06", rewardPoints: 1, rewardLifetime: 26, rewardsRedeemed: 5 },
+      { id: "CL-07", name: "Ana Torres", phone: "461 166 4422", email: null, visits: 2, totalSpent: 2680, lastVisit: "2026-09-07", rewardPoints: 2, rewardLifetime: 2, rewardsRedeemed: 0 },
     ];
     for (const c of customers) insertCustomer.run(c);
 
@@ -282,6 +299,7 @@ export function deleteProduct(id: string) {
 
 function rowToCustomer(row: {
   id: string; name: string; phone: string; email: string | null; visits: number; total_spent: number; last_visit: string;
+  reward_points: number; reward_lifetime: number; rewards_redeemed: number;
 }): Customer {
   return {
     id: row.id,
@@ -291,12 +309,37 @@ function rowToCustomer(row: {
     visits: row.visits,
     totalSpent: row.total_spent,
     lastVisit: row.last_visit,
+    rewardPoints: row.reward_points,
+    rewardLifetime: row.reward_lifetime,
+    rewardsRedeemed: row.rewards_redeemed,
   };
 }
 
 export function listCustomers(): Customer[] {
   const rows = getDb().prepare("SELECT * FROM customers ORDER BY total_spent DESC").all();
   return (rows as Parameters<typeof rowToCustomer>[0][]).map(rowToCustomer);
+}
+
+export function getCustomer(id: string): Customer | null {
+  const row = getDb().prepare("SELECT * FROM customers WHERE id = ?").get(id);
+  return row ? rowToCustomer(row as Parameters<typeof rowToCustomer>[0]) : null;
+}
+
+export class NotEnoughPointsError extends Error {}
+
+/** Canjea una recompensa: descuenta REWARD_THRESHOLD puntos y suma una al contador de canjeadas. */
+export function redeemReward(customerId: string): Customer {
+  const db = getDb();
+  const row = db.prepare("SELECT reward_points FROM customers WHERE id = ?").get(customerId) as
+    | { reward_points: number }
+    | undefined;
+  if (!row || row.reward_points < REWARD_THRESHOLD) {
+    throw new NotEnoughPointsError("El cliente no tiene suficientes puntos para canjear.");
+  }
+  db.prepare(
+    "UPDATE customers SET reward_points = reward_points - ?, rewards_redeemed = rewards_redeemed + 1 WHERE id = ?",
+  ).run(REWARD_THRESHOLD, customerId);
+  return getCustomer(customerId)!;
 }
 
 /** Finds a customer by phone, creating one if needed, and records a visit + spend. */
@@ -385,7 +428,21 @@ export function createAppointment(input: {
 }
 
 export function updateAppointmentStatus(id: string, status: AppointmentStatus) {
-  getDb().prepare("UPDATE appointments SET status = ? WHERE id = ?").run(status, id);
+  const db = getDb();
+  const current = db.prepare("SELECT status, phone FROM appointments WHERE id = ?").get(id) as
+    | { status: AppointmentStatus; phone: string }
+    | undefined;
+  const run = db.transaction(() => {
+    db.prepare("UPDATE appointments SET status = ? WHERE id = ?").run(status, id);
+    // Un punto de recompensa por cada servicio que se marca como completado,
+    // solo una vez (no vuelve a sumar si el estado ya estaba en completada).
+    if (current && status === "completada" && current.status !== "completada") {
+      db.prepare(
+        "UPDATE customers SET reward_points = reward_points + 1, reward_lifetime = reward_lifetime + 1 WHERE phone = ?",
+      ).run(current.phone);
+    }
+  });
+  run();
 }
 
 export function checkInAppointment(token: string): Appointment | null {
