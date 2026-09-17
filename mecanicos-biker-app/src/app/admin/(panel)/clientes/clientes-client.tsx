@@ -14,6 +14,7 @@ const TIER_STYLE: Record<string, string> = {
   Bronce: "bg-orange-50 text-orange-700",
   Plata: "bg-slate-100 text-slate-600",
   Oro: "bg-amber-50 text-amber-700",
+  Diamante: "bg-sky-50 text-sky-700",
 };
 
 const EMPTY_REWARD_FORM = { name: "", pointsCost: "" };

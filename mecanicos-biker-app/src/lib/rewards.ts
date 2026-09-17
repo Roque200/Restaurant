@@ -4,8 +4,9 @@
 /** Niveles del programa de recompensas, según puntos acumulados en la vida del cliente. */
 export const REWARD_TIERS = [
   { label: "Bronce", min: 0 },
-  { label: "Plata", min: 10 },
-  { label: "Oro", min: 25 },
+  { label: "Plata", min: 11 },
+  { label: "Oro", min: 21 },
+  { label: "Diamante", min: 31 },
 ] as const;
 
 export function getRewardTier(rewardLifetime: number) {
