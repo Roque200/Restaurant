@@ -6,32 +6,55 @@ import { staggerContainer, staggerItem } from "./Reveal";
 
 const TIERS = [
   {
-    name: "Básico",
-    desc: "Mantenimiento preventivo de rutina.",
+    name: "Normal",
+    desc: "Bicicleta rígida y doble suspensión.",
+    // Precio pendiente — cámbialo aquí.
     price: 450,
-    features: ["Ajuste de frenos y cambios", "Lubricación de transmisión", "Revisión de presión y tornillería"],
+    features: ["Limpieza y lavado general de la bicicleta.", "Lavado de cadena en tina ultrasónica."],
+    greasing: [
+      "Tazas de dirección.",
+      "Eje central.",
+      "Par de masas.",
+      "Cambio de chicote de velocidades (nuevo, de acero inoxidable).",
+      "Ajuste de velocidades.",
+    ],
   },
   {
-    name: "Completo",
-    desc: "Afinación integral de 30 puntos.",
+    name: "Intermedio",
+    desc: "Todo lo del paquete Normal, más frenos.",
+    // Precio pendiente — cámbialo aquí.
     price: 890,
     featured: true,
-    features: [
-      "Todo lo del paquete Básico",
-      "Purgado de frenos hidráulicos",
-      "Ajuste de suspensión (aire/sag)",
-      "Limpieza profunda y torque",
+    features: ["Limpieza y lavado general de la bicicleta.", "Lavado de cadena en tina ultrasónica."],
+    greasing: [
+      "Tazas de dirección.",
+      "Eje central.",
+      "Par de masas.",
+      "Cambio de chicote de velocidades (nuevo, de acero inoxidable).",
+      "Ajuste de velocidades.",
+      "Cambio de líquido hidráulico especial para frenos MTB.",
+      "Purga de frenos.",
+      "Descontaminación de discos y pastillas de frenado.",
     ],
+    note: "Tazas de dirección: de cartucho se reemplazan, de balero sellado se engrasan. Manos: de balero se reemplazan, de balero sellado se reemplazan.",
   },
   {
-    name: "Pro Suspensión",
-    desc: "Reconstrucción completa de suspensión.",
+    name: "Avanzado",
+    desc: "Todo lo del Intermedio, más servicio a la suspensión.",
+    // Precio pendiente — cámbialo aquí.
     price: 1650,
-    features: [
-      "Desarmado total de horquilla y amortiguador",
-      "Cambio de aceite y sellos originales",
-      "Calibración de presión por peso/uso",
+    features: ["Limpieza y lavado general de la bicicleta.", "Lavado de cadena en tina ultrasónica."],
+    greasing: [
+      "Tazas de dirección.",
+      "Eje central.",
+      "Par de masas.",
+      "Cambio de chicote de velocidades (nuevo, de acero inoxidable).",
+      "Ajuste de velocidades.",
+      "Cambio de líquido hidráulico especial para frenos MTB.",
+      "Purga de frenos.",
+      "Descontaminación de discos y pastillas de frenado.",
     ],
+    suspension: ["Mecánica.", "Hidráulica.", "Neumática."],
   },
 ];
 
@@ -72,11 +95,41 @@ export function Pricing() {
               <ul className="mt-6 flex flex-1 flex-col gap-2.5">
                 {tier.features.map((f) => (
                   <li key={f} className="flex gap-2 text-[13.5px] leading-relaxed">
-                    <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${tier.featured ? "bg-accent" : "bg-accent"}`} />
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
                     <span className={tier.featured ? "text-white/75" : "text-[#1d1d1f]/75"}>{f}</span>
                   </li>
                 ))}
+
+                <li className={`mt-1 text-[12px] font-semibold uppercase tracking-wide ${tier.featured ? "text-white/50" : "text-muted"}`}>
+                  Engrasado
+                </li>
+                {tier.greasing.map((f) => (
+                  <li key={f} className="flex gap-2 text-[13.5px] leading-relaxed">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                    <span className={tier.featured ? "text-white/75" : "text-[#1d1d1f]/75"}>{f}</span>
+                  </li>
+                ))}
+
+                {tier.suspension && (
+                  <>
+                    <li className={`mt-1 text-[12px] font-semibold uppercase tracking-wide ${tier.featured ? "text-white/50" : "text-muted"}`}>
+                      Servicio a la suspensión
+                    </li>
+                    {tier.suspension.map((f) => (
+                      <li key={f} className="flex gap-2 text-[13.5px] leading-relaxed">
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                        <span className={tier.featured ? "text-white/75" : "text-[#1d1d1f]/75"}>{f}</span>
+                      </li>
+                    ))}
+                  </>
+                )}
               </ul>
+
+              {tier.note && (
+                <p className={`mt-4 rounded-xl px-3.5 py-3 text-[12px] leading-relaxed ${tier.featured ? "bg-white/10 text-white/60" : "bg-black/5 text-muted"}`}>
+                  {tier.note}
+                </p>
+              )}
               <a
                 href="#contacto"
                 className={`mt-8 flex h-11 items-center justify-center rounded-full text-[14px] font-semibold transition-transform hover:scale-[1.02] active:scale-[0.98] ${

@@ -139,7 +139,7 @@ export function ClientesClient({
           placeholder="Buscar por nombre o teléfono…"
           className="h-9 w-full max-w-xs rounded-full border border-black/10 bg-white px-4 text-[13.5px] outline-none focus:border-accent"
         />
-        <p className="text-[12.5px] text-muted">1 punto por cada servicio completado · canjeable por los premios del catálogo</p>
+        <p className="text-[12.5px] text-muted">Puntos según el servicio completado · canjeables por los premios del catálogo</p>
       </div>
 
       <div className="rounded-2xl border border-black/5 bg-white p-5">

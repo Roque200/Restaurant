@@ -77,12 +77,11 @@ test.describe("Panel administrativo", () => {
     // textarea still holds the same text for a moment during its exit animation.
     await expect(page.getByRole("cell", { name: "Cámara de prueba", exact: true })).toBeVisible();
 
-    // Clientes: buscar
+    // Clientes: sin datos de muestra por ahora — se llenan con reservas reales
     await page.getByRole("link", { name: "Clientes" }).click();
     await expect(page).toHaveURL(/\/admin\/clientes/);
-    await page.getByPlaceholder("Buscar por nombre o teléfono…").fill("Roberto");
-    await expect(page.locator("table tbody tr")).toHaveCount(1);
-    await expect(page.getByText("Roberto Salas")).toBeVisible();
+    await expect(page.getByText("No se encontraron clientes.")).toBeVisible();
+    await expect(page.getByText("Catálogo de premios")).toBeVisible();
 
     // Cerrar sesión regresa al login y vuelve a bloquear el acceso
     await page.getByRole("button", { name: "Cerrar sesión" }).click();

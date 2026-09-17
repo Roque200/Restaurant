@@ -15,15 +15,8 @@ import {
 } from "@/lib/booking";
 import { waLink } from "@/lib/whatsapp";
 import { getMonthAvailability, bookAppointment } from "@/lib/actions/appointments";
+import { SERVICE_OPTIONS, OTHER_SERVICE_VALUE } from "@/lib/services";
 import { Reveal } from "./Reveal";
-
-const SERVICES = [
-  "Servicio de suspensión",
-  "Frenos hidráulicos",
-  "Transmisión",
-  "Afinación general",
-  "Diagnóstico",
-];
 
 type BookingResult = { id: string; url: string; qrDataUrl: string };
 
@@ -39,6 +32,8 @@ export function Booking() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<BookingResult | null>(null);
+  const [servicio, setServicio] = useState<string>(SERVICE_OPTIONS[0].name);
+  const [servicioOtro, setServicioOtro] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
   const days = useMemo(() => {
@@ -96,14 +91,15 @@ export function Booking() {
 
     const nombre = (form.elements.namedItem("nombre") as HTMLInputElement).value.trim();
     const telefono = (form.elements.namedItem("telefono") as HTMLInputElement).value.trim();
-    const servicio = (form.elements.namedItem("servicio") as HTMLSelectElement).value;
+    const servicioFinal = servicio === OTHER_SERVICE_VALUE ? servicioOtro.trim() : servicio;
+    if (!servicioFinal) return;
 
     setSubmitting(true);
     setSubmitError(null);
     const res = await bookAppointment({
       customer: nombre,
       phone: telefono,
-      service: servicio,
+      service: servicioFinal,
       date: isoDate(selectedDate),
       hour: formatHour(selectedHour),
     });
@@ -121,7 +117,7 @@ export function Booking() {
       "Hola, agendé una cita:\n" +
       `- Nombre: ${nombre}\n` +
       `- Teléfono: ${telefono}\n` +
-      `- Servicio: ${servicio}\n` +
+      `- Servicio: ${servicioFinal}\n` +
       `- Fecha: ${formatLongDate(selectedDate)}\n` +
       `- Hora: ${formatHour(selectedHour)} hrs\n` +
       `- Folio: ${res.id}\n` +
@@ -134,6 +130,8 @@ export function Booking() {
     setResult(null);
     setSelectedDate(null);
     setSelectedHour(null);
+    setServicio(SERVICE_OPTIONS[0].name);
+    setServicioOtro("");
     formRef.current?.reset();
   }
 
@@ -360,15 +358,32 @@ export function Booking() {
                   Servicio de interés
                   <select
                     name="servicio"
+                    value={servicio}
+                    onChange={(e) => setServicio(e.target.value)}
                     className="h-11 rounded-xl border border-black/10 px-3.5 text-[14.5px] text-[#1d1d1f] outline-none transition-colors focus:border-accent"
                   >
-                    {SERVICES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
+                    {SERVICE_OPTIONS.map((s) => (
+                      <option key={s.name} value={s.name}>
+                        {s.name}
                       </option>
                     ))}
+                    <option value={OTHER_SERVICE_VALUE}>Otro (cambio de un componente específico)</option>
                   </select>
                 </label>
+
+                {servicio === OTHER_SERVICE_VALUE && (
+                  <label className="flex flex-col gap-1.5 text-[13px] font-medium text-muted">
+                    ¿Qué componente quieres cambiar?
+                    <input
+                      type="text"
+                      required
+                      value={servicioOtro}
+                      onChange={(e) => setServicioOtro(e.target.value)}
+                      placeholder="Ej. cambiar asiento, cambiar manubrio…"
+                      className="h-11 rounded-xl border border-black/10 px-3.5 text-[14.5px] text-[#1d1d1f] outline-none transition-colors focus:border-accent"
+                    />
+                  </label>
+                )}
 
                 <button
                   type="submit"

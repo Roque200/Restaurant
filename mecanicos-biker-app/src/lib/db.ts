@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import path from "node:path";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import { pointsForService } from "./services";
 
 export type AppointmentStatus = "pendiente" | "confirmada" | "en_proceso" | "completada" | "cancelada";
 export type OrderStatus = "pendiente" | "pagado" | "entregado" | "cancelado";
@@ -176,9 +177,6 @@ function seedIfEmpty(db: Database.Database) {
   const insertProduct = db.prepare(
     "INSERT INTO products (id, name, category, description, price, stock, low_stock_threshold) VALUES (@id, @name, @category, @description, @price, @stock, @lowStockThreshold)",
   );
-  const insertCustomer = db.prepare(
-    "INSERT INTO customers (id, name, phone, email, visits, total_spent, last_visit, reward_points, reward_lifetime, rewards_redeemed, last_reward) VALUES (@id, @name, @phone, @email, @visits, @totalSpent, @lastVisit, @rewardPoints, @rewardLifetime, @rewardsRedeemed, @lastReward)",
-  );
   const insertRewardItem = db.prepare(
     "INSERT INTO reward_items (id, name, points_cost, active) VALUES (@id, @name, @pointsCost, @active)",
   );
@@ -206,16 +204,9 @@ function seedIfEmpty(db: Database.Database) {
     ];
     for (const p of products) insertProduct.run(p);
 
-    const customers: Customer[] = [
-      { id: "CL-01", name: "Javier Ramírez", phone: "461 100 2233", email: "javier.ramirez@mail.com", visits: 6, totalSpent: 5420, lastVisit: "2026-09-09", rewardPoints: 4, rewardLifetime: 9, rewardsRedeemed: 1, lastReward: "10% de descuento" },
-      { id: "CL-02", name: "Carla Mendoza", phone: "461 118 4455", email: "carla.m@mail.com", visits: 3, totalSpent: 2180, lastVisit: "2026-09-09", rewardPoints: 2, rewardLifetime: 2, rewardsRedeemed: 0, lastReward: null },
-      { id: "CL-03", name: "Diego Herrera", phone: "461 122 7788", email: null, visits: 9, totalSpent: 8950, lastVisit: "2026-09-08", rewardPoints: 3, rewardLifetime: 13, rewardsRedeemed: 2, lastReward: "Afinación general gratis" },
-      { id: "CL-04", name: "Laura Pineda", phone: "461 130 9911", email: "laura.pineda@mail.com", visits: 1, totalSpent: 890, lastVisit: "2026-09-11", rewardPoints: 1, rewardLifetime: 1, rewardsRedeemed: 0, lastReward: null },
-      { id: "CL-05", name: "Mariana Ríos", phone: "461 144 2200", email: null, visits: 4, totalSpent: 3100, lastVisit: "2026-09-11", rewardPoints: 3, rewardLifetime: 3, rewardsRedeemed: 0, lastReward: null },
-      { id: "CL-06", name: "Roberto Salas", phone: "461 155 3311", email: "r.salas@mail.com", visits: 12, totalSpent: 14200, lastVisit: "2026-09-06", rewardPoints: 1, rewardLifetime: 26, rewardsRedeemed: 5, lastReward: "Cambio de cadena gratis" },
-      { id: "CL-07", name: "Ana Torres", phone: "461 166 4422", email: null, visits: 2, totalSpent: 2680, lastVisit: "2026-09-07", rewardPoints: 2, rewardLifetime: 2, rewardsRedeemed: 0, lastReward: null },
-    ];
-    for (const c of customers) insertCustomer.run(c);
+    // Sin clientes de muestra por ahora — se crean solos en cuanto alguien
+    // agenda una cita o hace un pedido real, para probar los casos de uso
+    // desde cero.
 
     const rewardItems: RewardItem[] = [
       { id: "RW-01", name: "10% de descuento en tu próxima visita", pointsCost: 3, active: true },
@@ -225,14 +216,14 @@ function seedIfEmpty(db: Database.Database) {
     for (const r of rewardItems) insertRewardItem.run({ ...r, active: r.active ? 1 : 0 });
 
     const appointments: Omit<Appointment, "checkedInAt" | "notes">[] = [
-      { id: "C-1042", qrToken: crypto.randomUUID(), customer: "Javier Ramírez", phone: "461 100 2233", service: "Servicio de suspensión", date: "2026-09-10", hour: "09:00", status: "confirmada" },
-      { id: "C-1043", qrToken: crypto.randomUUID(), customer: "Carla Mendoza", phone: "461 118 4455", service: "Afinación general", date: "2026-09-10", hour: "11:00", status: "pendiente" },
-      { id: "C-1044", qrToken: crypto.randomUUID(), customer: "Diego Herrera", phone: "461 122 7788", service: "Frenos hidráulicos", date: "2026-09-10", hour: "13:00", status: "en_proceso" },
-      { id: "C-1045", qrToken: crypto.randomUUID(), customer: "Laura Pineda", phone: "461 130 9911", service: "Transmisión", date: "2026-09-11", hour: "10:00", status: "confirmada" },
-      { id: "C-1046", qrToken: crypto.randomUUID(), customer: "Mariana Ríos", phone: "461 144 2200", service: "Diagnóstico", date: "2026-09-11", hour: "15:00", status: "pendiente" },
-      { id: "C-1047", qrToken: crypto.randomUUID(), customer: "Roberto Salas", phone: "461 155 3311", service: "Servicio de suspensión", date: "2026-09-09", hour: "12:00", status: "completada" },
-      { id: "C-1048", qrToken: crypto.randomUUID(), customer: "Ana Torres", phone: "461 166 4422", service: "Afinación general", date: "2026-09-09", hour: "16:00", status: "cancelada" },
-      { id: "C-1049", qrToken: crypto.randomUUID(), customer: "Luis Fernández", phone: "461 177 5533", service: "Frenos hidráulicos", date: "2026-09-08", hour: "09:00", status: "completada" },
+      { id: "C-1042", qrToken: crypto.randomUUID(), customer: "Javier Ramírez", phone: "461 100 2233", service: "Servicio avanzado", date: "2026-09-10", hour: "09:00", status: "confirmada" },
+      { id: "C-1043", qrToken: crypto.randomUUID(), customer: "Carla Mendoza", phone: "461 118 4455", service: "Servicio intermedio", date: "2026-09-10", hour: "11:00", status: "pendiente" },
+      { id: "C-1044", qrToken: crypto.randomUUID(), customer: "Diego Herrera", phone: "461 122 7788", service: "Servicio de frenos", date: "2026-09-10", hour: "13:00", status: "en_proceso" },
+      { id: "C-1045", qrToken: crypto.randomUUID(), customer: "Laura Pineda", phone: "461 130 9911", service: "Servicio de shifter y desviador", date: "2026-09-11", hour: "10:00", status: "confirmada" },
+      { id: "C-1046", qrToken: crypto.randomUUID(), customer: "Mariana Ríos", phone: "461 144 2200", service: "Servicio básico", date: "2026-09-11", hour: "15:00", status: "pendiente" },
+      { id: "C-1047", qrToken: crypto.randomUUID(), customer: "Roberto Salas", phone: "461 155 3311", service: "Servicio avanzado", date: "2026-09-09", hour: "12:00", status: "completada" },
+      { id: "C-1048", qrToken: crypto.randomUUID(), customer: "Ana Torres", phone: "461 166 4422", service: "Servicio intermedio", date: "2026-09-09", hour: "16:00", status: "cancelada" },
+      { id: "C-1049", qrToken: crypto.randomUUID(), customer: "Luis Fernández", phone: "461 177 5533", service: "Servicio de frenos", date: "2026-09-08", hour: "09:00", status: "completada" },
     ];
     for (const a of appointments) insertAppointment.run(a);
 
@@ -251,7 +242,6 @@ function seedIfEmpty(db: Database.Database) {
     setCounter.run("appointments", 1049);
     setCounter.run("orders", 3305);
     setCounter.run("products", 8);
-    setCounter.run("customers", 7);
     setCounter.run("reward_items", 3);
   });
 
@@ -416,7 +406,7 @@ function touchCustomer(db: Database.Database, name: string, phone: string, spend
     ).run(spend, visitDate, name, existing.id);
     return;
   }
-  const id = `CL-${String(nextSeq("customers", 7)).padStart(2, "0")}`;
+  const id = `CL-${String(nextSeq("customers", 0)).padStart(2, "0")}`;
   db.prepare(
     "INSERT INTO customers (id, name, phone, email, visits, total_spent, last_visit) VALUES (?, ?, ?, NULL, 1, ?, ?)",
   ).run(id, name, phone, spend, visitDate);
@@ -492,17 +482,18 @@ export function createAppointment(input: {
 
 export function updateAppointmentStatus(id: string, status: AppointmentStatus) {
   const db = getDb();
-  const current = db.prepare("SELECT status, phone FROM appointments WHERE id = ?").get(id) as
-    | { status: AppointmentStatus; phone: string }
+  const current = db.prepare("SELECT status, phone, service FROM appointments WHERE id = ?").get(id) as
+    | { status: AppointmentStatus; phone: string; service: string }
     | undefined;
   const run = db.transaction(() => {
     db.prepare("UPDATE appointments SET status = ? WHERE id = ?").run(status, id);
-    // Un punto de recompensa por cada servicio que se marca como completado,
+    // Puntos de recompensa según el tipo de servicio, al marcarlo completado,
     // solo una vez (no vuelve a sumar si el estado ya estaba en completada).
     if (current && status === "completada" && current.status !== "completada") {
+      const points = pointsForService(current.service);
       db.prepare(
-        "UPDATE customers SET reward_points = reward_points + 1, reward_lifetime = reward_lifetime + 1 WHERE phone = ?",
-      ).run(current.phone);
+        "UPDATE customers SET reward_points = reward_points + ?, reward_lifetime = reward_lifetime + ? WHERE phone = ?",
+      ).run(points, points, current.phone);
     }
   });
   run();
