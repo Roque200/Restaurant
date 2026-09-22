@@ -6,10 +6,12 @@ import {
   createOrder as dbCreateOrder,
   setOrderPreference,
   updateOrderStatus as dbUpdateOrderStatus,
-  type OrderItem,
+  InvalidOrderError,
+  ProductNotFoundError,
   type OrderStatus,
 } from "@/lib/db";
 import { createOrderPreference, mercadoPagoEnabled } from "@/lib/mercadopago";
+import { requireAdmin } from "@/lib/require-admin";
 
 async function siteUrl() {
   const h = await headers();
@@ -25,15 +27,23 @@ export async function isOnlinePaymentAvailable() {
 export async function placeOrder(input: {
   customer: string;
   phone: string;
-  items: OrderItem[];
+  items: { name: string; qty: number }[];
   payWithMercadoPago: boolean;
 }) {
-  const order = dbCreateOrder({
-    customer: input.customer,
-    phone: input.phone,
-    items: input.items,
-    paymentMethod: input.payWithMercadoPago ? "mercadopago" : "whatsapp",
-  });
+  let order;
+  try {
+    order = dbCreateOrder({
+      customer: input.customer,
+      phone: input.phone,
+      items: input.items,
+      paymentMethod: input.payWithMercadoPago ? "mercadopago" : "whatsapp",
+    });
+  } catch (err) {
+    if (err instanceof InvalidOrderError || err instanceof ProductNotFoundError) {
+      return { ok: false as const, error: err.message };
+    }
+    throw err;
+  }
   revalidatePath("/admin/pedidos");
   revalidatePath("/admin/dashboard");
   revalidatePath("/admin/clientes");
@@ -58,6 +68,7 @@ export async function placeOrder(input: {
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {
+  await requireAdmin();
   dbUpdateOrderStatus(id, status);
   revalidatePath("/admin/pedidos");
   revalidatePath("/admin/dashboard");

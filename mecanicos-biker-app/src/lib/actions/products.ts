@@ -6,7 +6,9 @@ import {
   updateProduct as dbUpdateProduct,
   deleteProduct as dbDeleteProduct,
   type Product,
+  type ProductCategory,
 } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
 
 function revalidateProductRoutes() {
   revalidatePath("/admin/productos");
@@ -14,18 +16,40 @@ function revalidateProductRoutes() {
   revalidatePath("/");
 }
 
+const CATEGORIES: ProductCategory[] = ["componentes", "accesorios", "cuidado", "herramientas"];
+
+// Un archivo "use server" solo puede exportar funciones async, así que esta
+// clase de error se queda sin exportar — nada fuera de este archivo la usa.
+class InvalidProductError extends Error {}
+
+function sanitizeProductInput(input: Omit<Product, "id">): Omit<Product, "id"> {
+  const name = input.name.trim();
+  const description = input.description.trim();
+  if (!name) throw new InvalidProductError("El nombre es obligatorio.");
+  if (!CATEGORIES.includes(input.category)) throw new InvalidProductError("Categoría inválida.");
+  if (!Number.isFinite(input.price) || input.price < 0) throw new InvalidProductError("El precio debe ser 0 o mayor.");
+  if (!Number.isInteger(input.stock) || input.stock < 0) throw new InvalidProductError("El stock debe ser un entero 0 o mayor.");
+  if (!Number.isInteger(input.lowStockThreshold) || input.lowStockThreshold < 0) {
+    throw new InvalidProductError("La alerta de stock debe ser un entero 0 o mayor.");
+  }
+  return { ...input, name, description };
+}
+
 export async function createProduct(input: Omit<Product, "id">) {
-  const product = dbCreateProduct(input);
+  await requireAdmin();
+  const product = dbCreateProduct(sanitizeProductInput(input));
   revalidateProductRoutes();
   return product;
 }
 
 export async function updateProduct(id: string, input: Omit<Product, "id">) {
-  dbUpdateProduct(id, input);
+  await requireAdmin();
+  dbUpdateProduct(id, sanitizeProductInput(input));
   revalidateProductRoutes();
 }
 
 export async function deleteProduct(id: string) {
+  await requireAdmin();
   dbDeleteProduct(id);
   revalidateProductRoutes();
 }

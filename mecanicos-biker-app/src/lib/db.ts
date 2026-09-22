@@ -2,11 +2,22 @@ import Database from "better-sqlite3";
 import path from "node:path";
 import crypto from "node:crypto";
 import fs from "node:fs";
+import { pointsForService } from "./services";
+import { isoDate, startOfDay, isSunday, hoursForDate, formatHour } from "./booking";
 
 export type AppointmentStatus = "pendiente" | "confirmada" | "en_proceso" | "completada" | "cancelada";
 export type OrderStatus = "pendiente" | "pagado" | "entregado" | "cancelado";
 export type PaymentMethod = "whatsapp" | "mercadopago";
 export type ProductCategory = "componentes" | "accesorios" | "cuidado" | "herramientas";
+
+const APPOINTMENT_STATUSES: readonly AppointmentStatus[] = [
+  "pendiente",
+  "confirmada",
+  "en_proceso",
+  "completada",
+  "cancelada",
+];
+const ORDER_STATUSES: readonly OrderStatus[] = ["pendiente", "pagado", "entregado", "cancelado"];
 
 export type Appointment = {
   id: string;
@@ -51,6 +62,17 @@ export type Customer = {
   visits: number;
   totalSpent: number;
   lastVisit: string;
+  rewardPoints: number;
+  rewardLifetime: number;
+  rewardsRedeemed: number;
+  lastReward: string | null;
+};
+
+export type RewardItem = {
+  id: string;
+  name: string;
+  pointsCost: number;
+  active: boolean;
 };
 
 // Next.js hot-reloads modules in dev, which would otherwise reopen the file
@@ -134,7 +156,28 @@ function migrate(db: Database.Database) {
       price INTEGER NOT NULL,
       qty INTEGER NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS reward_items (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      points_cost INTEGER NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1
+    );
   `);
+
+  // Added after the initial release — ensureColumn keeps existing local
+  // databases (which predate these columns) working without a manual reset.
+  ensureColumn(db, "customers", "reward_points", "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn(db, "customers", "reward_lifetime", "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn(db, "customers", "rewards_redeemed", "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn(db, "customers", "last_reward", "TEXT");
+}
+
+function ensureColumn(db: Database.Database, table: string, column: string, definition: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!columns.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
 }
 
 function seedIfEmpty(db: Database.Database) {
@@ -144,8 +187,8 @@ function seedIfEmpty(db: Database.Database) {
   const insertProduct = db.prepare(
     "INSERT INTO products (id, name, category, description, price, stock, low_stock_threshold) VALUES (@id, @name, @category, @description, @price, @stock, @lowStockThreshold)",
   );
-  const insertCustomer = db.prepare(
-    "INSERT INTO customers (id, name, phone, email, visits, total_spent, last_visit) VALUES (@id, @name, @phone, @email, @visits, @totalSpent, @lastVisit)",
+  const insertRewardItem = db.prepare(
+    "INSERT INTO reward_items (id, name, points_cost, active) VALUES (@id, @name, @pointsCost, @active)",
   );
   const insertAppointment = db.prepare(
     "INSERT INTO appointments (id, qr_token, customer, phone, service, date, hour, status) VALUES (@id, @qrToken, @customer, @phone, @service, @date, @hour, @status)",
@@ -171,26 +214,26 @@ function seedIfEmpty(db: Database.Database) {
     ];
     for (const p of products) insertProduct.run(p);
 
-    const customers: Customer[] = [
-      { id: "CL-01", name: "Javier Ramírez", phone: "461 100 2233", email: "javier.ramirez@mail.com", visits: 6, totalSpent: 5420, lastVisit: "2026-09-09" },
-      { id: "CL-02", name: "Carla Mendoza", phone: "461 118 4455", email: "carla.m@mail.com", visits: 3, totalSpent: 2180, lastVisit: "2026-09-09" },
-      { id: "CL-03", name: "Diego Herrera", phone: "461 122 7788", email: null, visits: 9, totalSpent: 8950, lastVisit: "2026-09-08" },
-      { id: "CL-04", name: "Laura Pineda", phone: "461 130 9911", email: "laura.pineda@mail.com", visits: 1, totalSpent: 890, lastVisit: "2026-09-11" },
-      { id: "CL-05", name: "Mariana Ríos", phone: "461 144 2200", email: null, visits: 4, totalSpent: 3100, lastVisit: "2026-09-11" },
-      { id: "CL-06", name: "Roberto Salas", phone: "461 155 3311", email: "r.salas@mail.com", visits: 12, totalSpent: 14200, lastVisit: "2026-09-06" },
-      { id: "CL-07", name: "Ana Torres", phone: "461 166 4422", email: null, visits: 2, totalSpent: 2680, lastVisit: "2026-09-07" },
+    // Sin clientes de muestra por ahora — se crean solos en cuanto alguien
+    // agenda una cita o hace un pedido real, para probar los casos de uso
+    // desde cero.
+
+    const rewardItems: RewardItem[] = [
+      { id: "RW-01", name: "10% de descuento en tu próxima visita", pointsCost: 3, active: true },
+      { id: "RW-02", name: "Cambio de cadena gratis", pointsCost: 5, active: true },
+      { id: "RW-03", name: "Afinación general gratis", pointsCost: 8, active: true },
     ];
-    for (const c of customers) insertCustomer.run(c);
+    for (const r of rewardItems) insertRewardItem.run({ ...r, active: r.active ? 1 : 0 });
 
     const appointments: Omit<Appointment, "checkedInAt" | "notes">[] = [
-      { id: "C-1042", qrToken: crypto.randomUUID(), customer: "Javier Ramírez", phone: "461 100 2233", service: "Servicio de suspensión", date: "2026-09-10", hour: "09:00", status: "confirmada" },
-      { id: "C-1043", qrToken: crypto.randomUUID(), customer: "Carla Mendoza", phone: "461 118 4455", service: "Afinación general", date: "2026-09-10", hour: "11:00", status: "pendiente" },
-      { id: "C-1044", qrToken: crypto.randomUUID(), customer: "Diego Herrera", phone: "461 122 7788", service: "Frenos hidráulicos", date: "2026-09-10", hour: "13:00", status: "en_proceso" },
-      { id: "C-1045", qrToken: crypto.randomUUID(), customer: "Laura Pineda", phone: "461 130 9911", service: "Transmisión", date: "2026-09-11", hour: "10:00", status: "confirmada" },
-      { id: "C-1046", qrToken: crypto.randomUUID(), customer: "Mariana Ríos", phone: "461 144 2200", service: "Diagnóstico", date: "2026-09-11", hour: "15:00", status: "pendiente" },
-      { id: "C-1047", qrToken: crypto.randomUUID(), customer: "Roberto Salas", phone: "461 155 3311", service: "Servicio de suspensión", date: "2026-09-09", hour: "12:00", status: "completada" },
-      { id: "C-1048", qrToken: crypto.randomUUID(), customer: "Ana Torres", phone: "461 166 4422", service: "Afinación general", date: "2026-09-09", hour: "16:00", status: "cancelada" },
-      { id: "C-1049", qrToken: crypto.randomUUID(), customer: "Luis Fernández", phone: "461 177 5533", service: "Frenos hidráulicos", date: "2026-09-08", hour: "09:00", status: "completada" },
+      { id: "C-1042", qrToken: crypto.randomUUID(), customer: "Javier Ramírez", phone: "461 100 2233", service: "Servicio avanzado", date: "2026-09-10", hour: "09:00", status: "confirmada" },
+      { id: "C-1043", qrToken: crypto.randomUUID(), customer: "Carla Mendoza", phone: "461 118 4455", service: "Servicio intermedio", date: "2026-09-10", hour: "11:00", status: "pendiente" },
+      { id: "C-1044", qrToken: crypto.randomUUID(), customer: "Diego Herrera", phone: "461 122 7788", service: "Servicio de frenos", date: "2026-09-10", hour: "13:00", status: "en_proceso" },
+      { id: "C-1045", qrToken: crypto.randomUUID(), customer: "Laura Pineda", phone: "461 130 9911", service: "Servicio de shifter y desviador", date: "2026-09-11", hour: "10:00", status: "confirmada" },
+      { id: "C-1046", qrToken: crypto.randomUUID(), customer: "Mariana Ríos", phone: "461 144 2200", service: "Servicio básico", date: "2026-09-11", hour: "15:00", status: "pendiente" },
+      { id: "C-1047", qrToken: crypto.randomUUID(), customer: "Roberto Salas", phone: "461 155 3311", service: "Servicio avanzado", date: "2026-09-09", hour: "12:00", status: "completada" },
+      { id: "C-1048", qrToken: crypto.randomUUID(), customer: "Ana Torres", phone: "461 166 4422", service: "Servicio intermedio", date: "2026-09-09", hour: "16:00", status: "cancelada" },
+      { id: "C-1049", qrToken: crypto.randomUUID(), customer: "Luis Fernández", phone: "461 177 5533", service: "Servicio de frenos", date: "2026-09-08", hour: "09:00", status: "completada" },
     ];
     for (const a of appointments) insertAppointment.run(a);
 
@@ -209,7 +252,7 @@ function seedIfEmpty(db: Database.Database) {
     setCounter.run("appointments", 1049);
     setCounter.run("orders", 3305);
     setCounter.run("products", 8);
-    setCounter.run("customers", 7);
+    setCounter.run("reward_items", 3);
   });
 
   seed();
@@ -282,6 +325,7 @@ export function deleteProduct(id: string) {
 
 function rowToCustomer(row: {
   id: string; name: string; phone: string; email: string | null; visits: number; total_spent: number; last_visit: string;
+  reward_points: number; reward_lifetime: number; rewards_redeemed: number; last_reward: string | null;
 }): Customer {
   return {
     id: row.id,
@@ -291,12 +335,74 @@ function rowToCustomer(row: {
     visits: row.visits,
     totalSpent: row.total_spent,
     lastVisit: row.last_visit,
+    rewardPoints: row.reward_points,
+    rewardLifetime: row.reward_lifetime,
+    rewardsRedeemed: row.rewards_redeemed,
+    lastReward: row.last_reward,
   };
 }
 
 export function listCustomers(): Customer[] {
   const rows = getDb().prepare("SELECT * FROM customers ORDER BY total_spent DESC").all();
   return (rows as Parameters<typeof rowToCustomer>[0][]).map(rowToCustomer);
+}
+
+export function getCustomer(id: string): Customer | null {
+  const row = getDb().prepare("SELECT * FROM customers WHERE id = ?").get(id);
+  return row ? rowToCustomer(row as Parameters<typeof rowToCustomer>[0]) : null;
+}
+
+// ---------- Reward catalog ----------
+
+function rowToRewardItem(row: { id: string; name: string; points_cost: number; active: number }): RewardItem {
+  return { id: row.id, name: row.name, pointsCost: row.points_cost, active: row.active === 1 };
+}
+
+export function listRewardItems(): RewardItem[] {
+  const rows = getDb().prepare("SELECT * FROM reward_items ORDER BY points_cost ASC").all();
+  return (rows as Parameters<typeof rowToRewardItem>[0][]).map(rowToRewardItem);
+}
+
+export function createRewardItem(input: { name: string; pointsCost: number }): RewardItem {
+  const id = `RW-${String(nextSeq("reward_items", 3)).padStart(2, "0")}`;
+  getDb()
+    .prepare("INSERT INTO reward_items (id, name, points_cost, active) VALUES (?, ?, ?, 1)")
+    .run(id, input.name, input.pointsCost);
+  return { id, name: input.name, pointsCost: input.pointsCost, active: true };
+}
+
+export function updateRewardItem(id: string, input: { name: string; pointsCost: number; active: boolean }) {
+  getDb()
+    .prepare("UPDATE reward_items SET name = ?, points_cost = ?, active = ? WHERE id = ?")
+    .run(input.name, input.pointsCost, input.active ? 1 : 0, id);
+}
+
+export function deleteRewardItem(id: string) {
+  getDb().prepare("DELETE FROM reward_items WHERE id = ?").run(id);
+}
+
+export class NotEnoughPointsError extends Error {}
+export class RewardItemNotFoundError extends Error {}
+
+/** Canjea una recompensa del catálogo: descuenta su costo en puntos y registra cuál fue. */
+export function redeemReward(customerId: string, rewardItemId: string): Customer {
+  const db = getDb();
+  const item = db.prepare("SELECT * FROM reward_items WHERE id = ?").get(rewardItemId) as
+    | { name: string; points_cost: number }
+    | undefined;
+  if (!item) {
+    throw new RewardItemNotFoundError("Ese premio ya no existe en el catálogo.");
+  }
+  const customer = db.prepare("SELECT reward_points FROM customers WHERE id = ?").get(customerId) as
+    | { reward_points: number }
+    | undefined;
+  if (!customer || customer.reward_points < item.points_cost) {
+    throw new NotEnoughPointsError("El cliente no tiene suficientes puntos para canjear ese premio.");
+  }
+  db.prepare(
+    "UPDATE customers SET reward_points = reward_points - ?, rewards_redeemed = rewards_redeemed + 1, last_reward = ? WHERE id = ?",
+  ).run(item.points_cost, item.name, customerId);
+  return getCustomer(customerId)!;
 }
 
 /** Finds a customer by phone, creating one if needed, and records a visit + spend. */
@@ -310,7 +416,7 @@ function touchCustomer(db: Database.Database, name: string, phone: string, spend
     ).run(spend, visitDate, name, existing.id);
     return;
   }
-  const id = `CL-${String(nextSeq("customers", 7)).padStart(2, "0")}`;
+  const id = `CL-${String(nextSeq("customers", 0)).padStart(2, "0")}`;
   db.prepare(
     "INSERT INTO customers (id, name, phone, email, visits, total_spent, last_visit) VALUES (?, ?, ?, NULL, 1, ?, ?)",
   ).run(id, name, phone, spend, visitDate);
@@ -359,6 +465,23 @@ export function getBusyHoursInRange(from: string, to: string): Record<string, st
 }
 
 export class SlotTakenError extends Error {}
+export class InvalidAppointmentError extends Error {}
+
+/** Reglas de negocio del horario — el front ya las respeta, pero el server las vuelve a exigir. */
+function assertValidSlot(dateKey: string, hour: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateKey);
+  if (!match) throw new InvalidAppointmentError("Fecha inválida.");
+  const [, y, m, d] = match;
+  const date = new Date(Number(y), Number(m) - 1, Number(d));
+  if (isoDate(date) !== dateKey) throw new InvalidAppointmentError("Fecha inválida.");
+  if (date.getTime() < startOfDay(new Date()).getTime()) {
+    throw new InvalidAppointmentError("No se pueden agendar citas en fechas pasadas.");
+  }
+  if (isSunday(date)) throw new InvalidAppointmentError("El taller no abre los domingos.");
+  if (!hoursForDate(date).map(formatHour).includes(hour)) {
+    throw new InvalidAppointmentError("Ese horario no está disponible.");
+  }
+}
 
 export function createAppointment(input: {
   customer: string;
@@ -367,25 +490,53 @@ export function createAppointment(input: {
   date: string;
   hour: string;
 }): Appointment {
+  const customer = input.customer.trim();
+  const phone = input.phone.trim();
+  const service = input.service.trim();
+  if (!customer || !phone || !service) {
+    throw new InvalidAppointmentError("Nombre, teléfono y servicio son obligatorios.");
+  }
+  assertValidSlot(input.date, input.hour);
+
   const db = getDb();
   const id = `C-${nextSeq("appointments", 1049)}`;
   const qrToken = crypto.randomUUID();
   try {
     db.prepare(
       "INSERT INTO appointments (id, qr_token, customer, phone, service, date, hour, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')",
-    ).run(id, qrToken, input.customer, input.phone, input.service, input.date, input.hour);
+    ).run(id, qrToken, customer, phone, service, input.date, input.hour);
   } catch (err) {
     if (err instanceof Error && /UNIQUE constraint failed: appointments/.test(err.message)) {
       throw new SlotTakenError("Ese horario ya fue tomado.");
     }
     throw err;
   }
-  touchCustomer(db, input.customer, input.phone, 0, input.date);
-  return { id, qrToken, ...input, status: "pendiente", checkedInAt: null, notes: null };
+  touchCustomer(db, customer, phone, 0, input.date);
+  return { id, qrToken, customer, phone, service, date: input.date, hour: input.hour, status: "pendiente", checkedInAt: null, notes: null };
 }
 
+export class InvalidStatusError extends Error {}
+
 export function updateAppointmentStatus(id: string, status: AppointmentStatus) {
-  getDb().prepare("UPDATE appointments SET status = ? WHERE id = ?").run(status, id);
+  if (!APPOINTMENT_STATUSES.includes(status)) {
+    throw new InvalidStatusError("Estado de cita inválido.");
+  }
+  const db = getDb();
+  const current = db.prepare("SELECT status, phone, service FROM appointments WHERE id = ?").get(id) as
+    | { status: AppointmentStatus; phone: string; service: string }
+    | undefined;
+  const run = db.transaction(() => {
+    db.prepare("UPDATE appointments SET status = ? WHERE id = ?").run(status, id);
+    // Puntos de recompensa según el tipo de servicio, al marcarlo completado,
+    // solo una vez (no vuelve a sumar si el estado ya estaba en completada).
+    if (current && status === "completada" && current.status !== "completada") {
+      const points = pointsForService(current.service);
+      db.prepare(
+        "UPDATE customers SET reward_points = reward_points + ?, reward_lifetime = reward_lifetime + ? WHERE phone = ?",
+      ).run(points, points, current.phone);
+    }
+  });
+  run();
 }
 
 export function checkInAppointment(token: string): Appointment | null {
@@ -439,34 +590,61 @@ export function getOrder(id: string): Order | null {
   return rowsToOrder(row, items);
 }
 
+export class InvalidOrderError extends Error {}
+export class ProductNotFoundError extends Error {}
+
 export function createOrder(input: {
   customer: string;
   phone: string;
-  items: OrderItem[];
+  items: { name: string; qty: number }[];
   paymentMethod: PaymentMethod;
 }): Order {
+  const customer = input.customer.trim();
+  const phone = input.phone.trim();
+  if (!customer || !phone) throw new InvalidOrderError("Nombre y teléfono son obligatorios.");
+  if (input.items.length === 0) throw new InvalidOrderError("El pedido no tiene productos.");
+
   const db = getDb();
   const id = `P-${nextSeq("orders", 3305)}`;
-  const total = input.items.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const getProductByName = db.prepare("SELECT * FROM products WHERE name = ?");
+  // El precio SIEMPRE se toma de la base de datos, nunca de lo que mande el
+  // navegador — así el cliente no puede decidir cuánto paga.
+  const pricedItems: OrderItem[] = input.items.map((item) => {
+    if (!Number.isInteger(item.qty) || item.qty <= 0) {
+      throw new InvalidOrderError(`Cantidad inválida para "${item.name}".`);
+    }
+    const product = getProductByName.get(item.name) as
+      | { name: string; price: number; stock: number }
+      | undefined;
+    if (!product) throw new ProductNotFoundError(`"${item.name}" ya no está disponible.`);
+    if (product.stock < item.qty) throw new InvalidOrderError(`No hay suficiente stock de "${item.name}".`);
+    return { name: product.name, price: product.price, qty: item.qty };
+  });
+  const total = pricedItems.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const date = new Date().toISOString().slice(0, 10);
+
   const create = db.transaction(() => {
     db.prepare(
       "INSERT INTO orders (id, customer, phone, status, payment_method) VALUES (?, ?, ?, 'pendiente', ?)",
-    ).run(id, input.customer, input.phone, input.paymentMethod);
+    ).run(id, customer, phone, input.paymentMethod);
     const insertItem = db.prepare("INSERT INTO order_items (order_id, name, price, qty) VALUES (?, ?, ?, ?)");
     const decrementStock = db.prepare(
       "UPDATE products SET stock = MAX(0, stock - ?) WHERE name = ?",
     );
-    for (const item of input.items) {
+    for (const item of pricedItems) {
       insertItem.run(id, item.name, item.price, item.qty);
       decrementStock.run(item.qty, item.name);
     }
-    touchCustomer(db, input.customer, input.phone, total, new Date().toISOString().slice(0, 10));
+    touchCustomer(db, customer, phone, total, date);
   });
   create();
-  return { id, ...input, status: "pendiente", mpPaymentId: null, date: new Date().toISOString().slice(0, 10) };
+  return { id, customer, phone, items: pricedItems, paymentMethod: input.paymentMethod, status: "pendiente", mpPaymentId: null, date };
 }
 
 export function updateOrderStatus(id: string, status: OrderStatus) {
+  if (!ORDER_STATUSES.includes(status)) {
+    throw new InvalidStatusError("Estado de pedido inválido.");
+  }
   const db = getDb();
   const current = db.prepare("SELECT status FROM orders WHERE id = ?").get(id) as { status: OrderStatus } | undefined;
   const run = db.transaction(() => {

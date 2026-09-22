@@ -76,6 +76,23 @@ test.describe("Reservas con código QR y check-in", () => {
     const row = page.locator("table tbody tr").filter({ hasText: "QR Tester" });
     await expect(row).toHaveCount(1);
     await expect(row.getByText("Sí, por QR")).toBeVisible();
+
+    // La reserva ya creó al cliente en automático — todavía sin puntos porque
+    // la cita no se ha marcado como completada.
+    await page.goto("/admin/clientes", { waitUntil: "networkidle" });
+    await page.getByPlaceholder("Buscar por nombre o teléfono…").fill("QR Tester");
+    const customerRow = page.locator("table tbody tr").filter({ hasText: "QR Tester" });
+    await expect(customerRow).toHaveCount(1);
+    await expect(customerRow.locator("td").nth(5)).toHaveText("0");
+
+    // Al completar el servicio se le asignan los puntos según el tipo elegido.
+    await page.goto("/admin/citas", { waitUntil: "networkidle" });
+    await page.getByPlaceholder("Buscar cliente…").fill("QR Tester");
+    await page.locator("table tbody tr").filter({ hasText: "QR Tester" }).locator("select").selectOption("completada");
+
+    await page.goto("/admin/clientes", { waitUntil: "networkidle" });
+    await page.getByPlaceholder("Buscar por nombre o teléfono…").fill("QR Tester");
+    await expect(page.locator("table tbody tr").filter({ hasText: "QR Tester" }).locator("td").nth(5)).not.toHaveText("0");
   });
 });
 

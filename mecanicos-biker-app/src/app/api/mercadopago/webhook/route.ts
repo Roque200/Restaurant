@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { markOrderPaid } from "@/lib/db";
+import { getOrder, markOrderPaid, orderTotal } from "@/lib/db";
 import { fetchPayment, mercadoPagoEnabled } from "@/lib/mercadopago";
 
 /**
@@ -37,10 +37,20 @@ export async function POST(request: NextRequest) {
     const orderId = payment.external_reference;
 
     if (payment.status === "approved" && orderId) {
-      const updated = markOrderPaid(orderId, String(payment.id));
-      if (updated) {
-        revalidatePath("/admin/pedidos");
-        revalidatePath("/admin/dashboard");
+      const order = getOrder(orderId);
+      const expected = order ? orderTotal(order) : null;
+      const paid = payment.transaction_amount;
+      // Nunca marcamos como pagado sin comparar contra el total real del
+      // pedido en nuestra base de datos — así Mercado Pago no puede confirmar
+      // un monto distinto al que en realidad se debía cobrar.
+      if (order && expected !== null && paid != null && Math.round(paid) === Math.round(expected)) {
+        const updated = markOrderPaid(orderId, String(payment.id));
+        if (updated) {
+          revalidatePath("/admin/pedidos");
+          revalidatePath("/admin/dashboard");
+        }
+      } else {
+        console.error("mercadopago webhook: monto no coincide con el pedido", { orderId, expected, paid });
       }
     }
   } catch (err) {

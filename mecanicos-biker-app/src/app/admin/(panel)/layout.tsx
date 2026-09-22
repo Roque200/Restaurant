@@ -1,29 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Sidebar } from "@/components/admin/Sidebar";
 import { Topbar } from "@/components/admin/Topbar";
-import { hasAdminSession } from "@/lib/admin-auth";
 
+// La sesión ya se valida en src/proxy.ts antes de que esta ruta reciba
+// cualquier dato — si el navegador llegó a renderizar este layout es porque
+// la cookie de sesión es válida. Este componente solo maneja el menú móvil.
 export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [checked, setChecked] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-
-  useEffect(() => {
-    if (!hasAdminSession()) {
-      router.replace("/admin/login");
-      return;
-    }
-    // One-time check against localStorage after mount, so server and client
-    // agree on nothing being rendered until we know the session is valid.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setChecked(true);
-  }, [router]);
-
-  if (!checked) return null;
 
   return (
     <div className="flex min-h-screen bg-surface">

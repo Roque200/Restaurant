@@ -4,19 +4,23 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { LogoMark } from "@/components/Logo";
-import { checkDemoCredentials, setAdminSession } from "@/lib/admin-auth";
+import { loginAdmin } from "@/lib/actions/auth";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
   const [error, setError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (checkDemoCredentials(user, pass)) {
-      setAdminSession();
+    setSubmitting(true);
+    const result = await loginAdmin(user, pass);
+    setSubmitting(false);
+    if (result.ok) {
       router.push("/admin/dashboard");
+      router.refresh();
     } else {
       setError(true);
     }
@@ -70,16 +74,12 @@ export default function AdminLoginPage() {
 
           <button
             type="submit"
-            className="mt-2 flex h-11 items-center justify-center rounded-full bg-accent text-[14.5px] font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            disabled={submitting}
+            className="mt-2 flex h-11 items-center justify-center rounded-full bg-accent text-[14.5px] font-semibold text-white transition-transform enabled:hover:scale-[1.02] enabled:active:scale-[0.98] disabled:opacity-60"
           >
-            Iniciar sesión
+            {submitting ? "Entrando…" : "Iniciar sesión"}
           </button>
         </form>
-
-        <p className="mt-6 text-center text-[12px] text-muted">
-          Demo: usuario <span className="font-mono">admin</span> · contraseña{" "}
-          <span className="font-mono">biker2026</span>
-        </p>
       </motion.div>
     </div>
   );

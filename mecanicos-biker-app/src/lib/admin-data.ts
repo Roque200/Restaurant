@@ -7,8 +7,10 @@ export type {
   Order,
   Product,
   Customer,
+  RewardItem,
 } from "@/lib/db";
 export { orderTotal } from "@/lib/pricing";
+export { REWARD_TIERS, getRewardTier } from "@/lib/rewards";
 import type { AppointmentStatus, OrderStatus, ProductCategory } from "@/lib/db";
 
 export const APPOINTMENT_STATUS_LABEL: Record<AppointmentStatus, string> = {
