@@ -10,8 +10,10 @@ import {
   checkInAppointment as dbCheckInAppointment,
   updateAppointmentStatus as dbUpdateAppointmentStatus,
   SlotTakenError,
+  InvalidAppointmentError,
   type AppointmentStatus,
 } from "@/lib/db";
+import { requireAdmin } from "@/lib/require-admin";
 
 async function siteUrl() {
   const h = await headers();
@@ -41,7 +43,7 @@ export async function bookAppointment(input: {
     revalidatePath("/admin/clientes");
     return { ok: true as const, id: appointment.id, url, qrDataUrl };
   } catch (err) {
-    if (err instanceof SlotTakenError) {
+    if (err instanceof SlotTakenError || err instanceof InvalidAppointmentError) {
       return { ok: false as const, error: err.message };
     }
     throw err;
@@ -53,6 +55,7 @@ export async function getAppointmentByToken(token: string) {
 }
 
 export async function checkInAppointment(token: string) {
+  await requireAdmin();
   const appointment = dbCheckInAppointment(token);
   revalidatePath("/admin/citas");
   revalidatePath("/admin/dashboard");
@@ -60,6 +63,7 @@ export async function checkInAppointment(token: string) {
 }
 
 export async function updateAppointmentStatus(id: string, status: AppointmentStatus) {
+  await requireAdmin();
   dbUpdateAppointmentStatus(id, status);
   revalidatePath("/admin/citas");
   revalidatePath("/admin/dashboard");

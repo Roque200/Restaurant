@@ -3,11 +3,21 @@ import path from "node:path";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import { pointsForService } from "./services";
+import { isoDate, startOfDay, isSunday, hoursForDate, formatHour } from "./booking";
 
 export type AppointmentStatus = "pendiente" | "confirmada" | "en_proceso" | "completada" | "cancelada";
 export type OrderStatus = "pendiente" | "pagado" | "entregado" | "cancelado";
 export type PaymentMethod = "whatsapp" | "mercadopago";
 export type ProductCategory = "componentes" | "accesorios" | "cuidado" | "herramientas";
+
+const APPOINTMENT_STATUSES: readonly AppointmentStatus[] = [
+  "pendiente",
+  "confirmada",
+  "en_proceso",
+  "completada",
+  "cancelada",
+];
+const ORDER_STATUSES: readonly OrderStatus[] = ["pendiente", "pagado", "entregado", "cancelado"];
 
 export type Appointment = {
   id: string;
@@ -455,6 +465,23 @@ export function getBusyHoursInRange(from: string, to: string): Record<string, st
 }
 
 export class SlotTakenError extends Error {}
+export class InvalidAppointmentError extends Error {}
+
+/** Reglas de negocio del horario — el front ya las respeta, pero el server las vuelve a exigir. */
+function assertValidSlot(dateKey: string, hour: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateKey);
+  if (!match) throw new InvalidAppointmentError("Fecha inválida.");
+  const [, y, m, d] = match;
+  const date = new Date(Number(y), Number(m) - 1, Number(d));
+  if (isoDate(date) !== dateKey) throw new InvalidAppointmentError("Fecha inválida.");
+  if (date.getTime() < startOfDay(new Date()).getTime()) {
+    throw new InvalidAppointmentError("No se pueden agendar citas en fechas pasadas.");
+  }
+  if (isSunday(date)) throw new InvalidAppointmentError("El taller no abre los domingos.");
+  if (!hoursForDate(date).map(formatHour).includes(hour)) {
+    throw new InvalidAppointmentError("Ese horario no está disponible.");
+  }
+}
 
 export function createAppointment(input: {
   customer: string;
@@ -463,24 +490,37 @@ export function createAppointment(input: {
   date: string;
   hour: string;
 }): Appointment {
+  const customer = input.customer.trim();
+  const phone = input.phone.trim();
+  const service = input.service.trim();
+  if (!customer || !phone || !service) {
+    throw new InvalidAppointmentError("Nombre, teléfono y servicio son obligatorios.");
+  }
+  assertValidSlot(input.date, input.hour);
+
   const db = getDb();
   const id = `C-${nextSeq("appointments", 1049)}`;
   const qrToken = crypto.randomUUID();
   try {
     db.prepare(
       "INSERT INTO appointments (id, qr_token, customer, phone, service, date, hour, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')",
-    ).run(id, qrToken, input.customer, input.phone, input.service, input.date, input.hour);
+    ).run(id, qrToken, customer, phone, service, input.date, input.hour);
   } catch (err) {
     if (err instanceof Error && /UNIQUE constraint failed: appointments/.test(err.message)) {
       throw new SlotTakenError("Ese horario ya fue tomado.");
     }
     throw err;
   }
-  touchCustomer(db, input.customer, input.phone, 0, input.date);
-  return { id, qrToken, ...input, status: "pendiente", checkedInAt: null, notes: null };
+  touchCustomer(db, customer, phone, 0, input.date);
+  return { id, qrToken, customer, phone, service, date: input.date, hour: input.hour, status: "pendiente", checkedInAt: null, notes: null };
 }
 
+export class InvalidStatusError extends Error {}
+
 export function updateAppointmentStatus(id: string, status: AppointmentStatus) {
+  if (!APPOINTMENT_STATUSES.includes(status)) {
+    throw new InvalidStatusError("Estado de cita inválido.");
+  }
   const db = getDb();
   const current = db.prepare("SELECT status, phone, service FROM appointments WHERE id = ?").get(id) as
     | { status: AppointmentStatus; phone: string; service: string }
@@ -550,34 +590,61 @@ export function getOrder(id: string): Order | null {
   return rowsToOrder(row, items);
 }
 
+export class InvalidOrderError extends Error {}
+export class ProductNotFoundError extends Error {}
+
 export function createOrder(input: {
   customer: string;
   phone: string;
-  items: OrderItem[];
+  items: { name: string; qty: number }[];
   paymentMethod: PaymentMethod;
 }): Order {
+  const customer = input.customer.trim();
+  const phone = input.phone.trim();
+  if (!customer || !phone) throw new InvalidOrderError("Nombre y teléfono son obligatorios.");
+  if (input.items.length === 0) throw new InvalidOrderError("El pedido no tiene productos.");
+
   const db = getDb();
   const id = `P-${nextSeq("orders", 3305)}`;
-  const total = input.items.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const getProductByName = db.prepare("SELECT * FROM products WHERE name = ?");
+  // El precio SIEMPRE se toma de la base de datos, nunca de lo que mande el
+  // navegador — así el cliente no puede decidir cuánto paga.
+  const pricedItems: OrderItem[] = input.items.map((item) => {
+    if (!Number.isInteger(item.qty) || item.qty <= 0) {
+      throw new InvalidOrderError(`Cantidad inválida para "${item.name}".`);
+    }
+    const product = getProductByName.get(item.name) as
+      | { name: string; price: number; stock: number }
+      | undefined;
+    if (!product) throw new ProductNotFoundError(`"${item.name}" ya no está disponible.`);
+    if (product.stock < item.qty) throw new InvalidOrderError(`No hay suficiente stock de "${item.name}".`);
+    return { name: product.name, price: product.price, qty: item.qty };
+  });
+  const total = pricedItems.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const date = new Date().toISOString().slice(0, 10);
+
   const create = db.transaction(() => {
     db.prepare(
       "INSERT INTO orders (id, customer, phone, status, payment_method) VALUES (?, ?, ?, 'pendiente', ?)",
-    ).run(id, input.customer, input.phone, input.paymentMethod);
+    ).run(id, customer, phone, input.paymentMethod);
     const insertItem = db.prepare("INSERT INTO order_items (order_id, name, price, qty) VALUES (?, ?, ?, ?)");
     const decrementStock = db.prepare(
       "UPDATE products SET stock = MAX(0, stock - ?) WHERE name = ?",
     );
-    for (const item of input.items) {
+    for (const item of pricedItems) {
       insertItem.run(id, item.name, item.price, item.qty);
       decrementStock.run(item.qty, item.name);
     }
-    touchCustomer(db, input.customer, input.phone, total, new Date().toISOString().slice(0, 10));
+    touchCustomer(db, customer, phone, total, date);
   });
   create();
-  return { id, ...input, status: "pendiente", mpPaymentId: null, date: new Date().toISOString().slice(0, 10) };
+  return { id, customer, phone, items: pricedItems, paymentMethod: input.paymentMethod, status: "pendiente", mpPaymentId: null, date };
 }
 
 export function updateOrderStatus(id: string, status: OrderStatus) {
+  if (!ORDER_STATUSES.includes(status)) {
+    throw new InvalidStatusError("Estado de pedido inválido.");
+  }
   const db = getDb();
   const current = db.prepare("SELECT status FROM orders WHERE id = ?").get(id) as { status: OrderStatus } | undefined;
   const run = db.transaction(() => {

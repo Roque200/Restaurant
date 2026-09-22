@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogoMark } from "@/components/Logo";
-import { clearAdminSession } from "@/lib/admin-auth";
+import { logoutAdmin } from "@/lib/actions/auth";
 
 const NAV = [
   {
@@ -66,9 +66,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  function handleLogout() {
-    clearAdminSession();
+  async function handleLogout() {
+    await logoutAdmin();
     router.push("/admin/login");
+    router.refresh();
   }
 
   return (

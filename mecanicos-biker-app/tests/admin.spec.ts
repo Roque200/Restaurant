@@ -26,6 +26,29 @@ test.describe("Panel administrativo", () => {
     expect(consoleErrors, `Errores de consola: ${consoleErrors.join(", ")}`).toEqual([]);
   });
 
+  test("no filtra datos de clientes ni acepta una cookie falsificada", async ({ page, context }) => {
+    // Sin sesión: la respuesta del servidor a /admin/clientes debe ser un
+    // redirect y no debe traer ni un dato de un cliente real en el cuerpo.
+    const response = await page.request.get("/admin/clientes", { maxRedirects: 0 }).catch((e) => e);
+    // Algunos clientes HTTP tratan el 307 como error si no se siguen redirects;
+    // en cualquier caso, verificamos que la URL final tras navegar sea el login.
+    if (response && "status" in response) {
+      expect([307, 308]).toContain(response.status());
+    }
+    await page.goto("/admin/clientes", { waitUntil: "networkidle" });
+    await expect(page).toHaveURL(/\/admin\/login/);
+
+    // Una cookie de sesión inventada (sin la firma correcta) tampoco sirve.
+    await context.addCookies([
+      { name: "mb_admin_session", value: "admin.9999999999999.not-a-real-signature", url: "http://localhost:3000" },
+    ]);
+    await page.goto("/admin/dashboard", { waitUntil: "networkidle" });
+    await expect(page).toHaveURL(/\/admin\/login/);
+
+    // El login ya no debe mostrar las credenciales de demo en texto plano.
+    await expect(page.getByText("biker2026")).toHaveCount(0);
+  });
+
   test("navega entre secciones y valida las interacciones clave", async ({ page }) => {
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];
