@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import {
   createOrder as dbCreateOrder,
+  createManualSale as dbCreateManualSale,
   setOrderPreference,
   updateOrderStatus as dbUpdateOrderStatus,
   InvalidOrderError,
@@ -65,6 +66,25 @@ export async function placeOrder(input: {
   if (preference.id) setOrderPreference(order.id, preference.id);
   const checkoutUrl = preference.init_point ?? preference.sandbox_init_point ?? null;
   return { ok: true as const, order, checkoutUrl };
+}
+
+export async function registerManualSale(input: {
+  customer: string;
+  phone: string;
+  items: { name: string; qty: number; price: number }[];
+}) {
+  await requireAdmin();
+  try {
+    const order = dbCreateManualSale(input);
+    revalidatePath("/admin/pedidos");
+    revalidatePath("/admin/dashboard");
+    revalidatePath("/admin/clientes");
+    revalidatePath("/admin/ventas");
+    return { ok: true as const, order };
+  } catch (err) {
+    if (err instanceof InvalidOrderError) return { ok: false as const, error: err.message };
+    throw err;
+  }
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {

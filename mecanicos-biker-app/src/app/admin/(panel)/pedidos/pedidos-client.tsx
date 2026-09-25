@@ -19,6 +19,7 @@ const STATUS_OPTIONS: OrderStatus[] = ["pendiente", "pagado", "entregado", "canc
 const PAYMENT_LABEL: Record<Order["paymentMethod"], string> = {
   whatsapp: "WhatsApp",
   mercadopago: "Mercado Pago",
+  mostrador: "Mostrador",
 };
 
 export function PedidosClient({ initialOrders }: { initialOrders: Order[] }) {
