@@ -23,6 +23,21 @@ export const WEEKDAYS_ES = [
   "sábado",
 ];
 
+export type WeeklyDaySchedule = {
+  dayOfWeek: number; // 0 = domingo ... 6 = sábado
+  isOpen: boolean;
+  openHour: number;
+  closeHour: number; // última hora en la que se puede agendar (no la hora de cierre del local)
+};
+
+export type ScheduleOverride = {
+  date: string; // yyyy-mm-dd
+  closed: boolean;
+  openHour: number | null;
+  closeHour: number | null;
+  note: string | null;
+};
+
 /** Zero-padded ISO date (yyyy-mm-dd), matching the format stored in the database. */
 export function isoDate(date: Date) {
   const y = date.getFullYear();
@@ -37,15 +52,34 @@ export function startOfDay(date: Date) {
   return d;
 }
 
-export function isSunday(date: Date) {
-  return date.getDay() === 0;
+function hourRange(open: number, close: number): number[] {
+  const hours: number[] = [];
+  for (let h = open; h <= close; h++) hours.push(h);
+  return hours;
 }
 
-export function hoursForDate(date: Date): number[] {
-  const day = date.getDay();
-  if (day === 0) return [];
-  if (day === 6) return [9, 10, 11, 12, 13, 14];
-  return [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+/**
+ * Horas agendables para una fecha, según el horario semanal configurado por
+ * el administrador y cualquier excepción para ese día en particular. La
+ * misma función corre en el calendario del cliente y en la validación del
+ * servidor, para que nunca queden desincronizados.
+ */
+export function computeHoursForDate(
+  date: Date,
+  weekly: WeeklyDaySchedule[],
+  overrides: Record<string, ScheduleOverride>,
+): number[] {
+  const override = overrides[isoDate(date)];
+  const day = weekly.find((w) => w.dayOfWeek === date.getDay());
+  if (override) {
+    if (override.closed) return [];
+    const open = override.openHour ?? day?.openHour;
+    const close = override.closeHour ?? day?.closeHour;
+    if (open == null || close == null || open > close) return [];
+    return hourRange(open, close);
+  }
+  if (!day || !day.isOpen || day.openHour > day.closeHour) return [];
+  return hourRange(day.openHour, day.closeHour);
 }
 
 export function formatHour(hour: number) {

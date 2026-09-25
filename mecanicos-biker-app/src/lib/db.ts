@@ -3,12 +3,24 @@ import path from "node:path";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import { pointsForService } from "./services";
-import { isoDate, startOfDay, isSunday, hoursForDate, formatHour } from "./booking";
+import { isoDate, startOfDay, computeHoursForDate, formatHour, type WeeklyDaySchedule, type ScheduleOverride } from "./booking";
+
+export type { WeeklyDaySchedule, ScheduleOverride };
 
 export type AppointmentStatus = "pendiente" | "confirmada" | "en_proceso" | "completada" | "cancelada";
 export type OrderStatus = "pendiente" | "pagado" | "entregado" | "cancelado";
-export type PaymentMethod = "whatsapp" | "mercadopago";
+export type PaymentMethod = "whatsapp" | "mercadopago" | "mostrador";
 export type ProductCategory = "componentes" | "accesorios" | "cuidado" | "herramientas";
+
+const DEFAULT_WEEKLY_SCHEDULE: WeeklyDaySchedule[] = [
+  { dayOfWeek: 0, isOpen: false, openHour: 9, closeHour: 14 }, // domingo
+  { dayOfWeek: 1, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 2, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 3, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 4, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 5, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 6, isOpen: true, openHour: 9, closeHour: 14 }, // sábado
+];
 
 const APPOINTMENT_STATUSES: readonly AppointmentStatus[] = [
   "pendiente",
@@ -163,6 +175,21 @@ function migrate(db: Database.Database) {
       points_cost INTEGER NOT NULL,
       active INTEGER NOT NULL DEFAULT 1
     );
+
+    CREATE TABLE IF NOT EXISTS weekly_schedule (
+      day_of_week INTEGER PRIMARY KEY,
+      is_open INTEGER NOT NULL,
+      open_hour INTEGER NOT NULL,
+      close_hour INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS schedule_overrides (
+      date TEXT PRIMARY KEY,
+      closed INTEGER NOT NULL,
+      open_hour INTEGER,
+      close_hour INTEGER,
+      note TEXT
+    );
   `);
 
   // Added after the initial release — ensureColumn keeps existing local
@@ -171,6 +198,20 @@ function migrate(db: Database.Database) {
   ensureColumn(db, "customers", "reward_lifetime", "INTEGER NOT NULL DEFAULT 0");
   ensureColumn(db, "customers", "rewards_redeemed", "INTEGER NOT NULL DEFAULT 0");
   ensureColumn(db, "customers", "last_reward", "TEXT");
+
+  // El horario semanal debe existir siempre (no solo en bases de datos
+  // nuevas) — si la tabla está vacía, se llena con el horario que el taller
+  // ya usaba antes de que el administrador pudiera configurarlo.
+  const { n: weeklyRows } = db.prepare("SELECT COUNT(*) as n FROM weekly_schedule").get() as { n: number };
+  if (weeklyRows === 0) {
+    const insertDay = db.prepare(
+      "INSERT INTO weekly_schedule (day_of_week, is_open, open_hour, close_hour) VALUES (@dayOfWeek, @isOpen, @openHour, @closeHour)",
+    );
+    const seedWeekly = db.transaction(() => {
+      for (const day of DEFAULT_WEEKLY_SCHEDULE) insertDay.run({ ...day, isOpen: day.isOpen ? 1 : 0 });
+    });
+    seedWeekly();
+  }
 }
 
 function ensureColumn(db: Database.Database, table: string, column: string, definition: string) {
@@ -422,6 +463,99 @@ function touchCustomer(db: Database.Database, name: string, phone: string, spend
   ).run(id, name, phone, spend, visitDate);
 }
 
+// ---------- Horario ----------
+
+function rowToWeeklyDay(row: { day_of_week: number; is_open: number; open_hour: number; close_hour: number }): WeeklyDaySchedule {
+  return { dayOfWeek: row.day_of_week, isOpen: row.is_open === 1, openHour: row.open_hour, closeHour: row.close_hour };
+}
+
+function rowToOverride(row: { date: string; closed: number; open_hour: number | null; close_hour: number | null; note: string | null }): ScheduleOverride {
+  return { date: row.date, closed: row.closed === 1, openHour: row.open_hour, closeHour: row.close_hour, note: row.note };
+}
+
+export function getWeeklySchedule(): WeeklyDaySchedule[] {
+  const rows = getDb().prepare("SELECT * FROM weekly_schedule ORDER BY day_of_week ASC").all();
+  return (rows as Parameters<typeof rowToWeeklyDay>[0][]).map(rowToWeeklyDay);
+}
+
+export class InvalidScheduleError extends Error {}
+
+export function updateWeeklySchedule(days: WeeklyDaySchedule[]) {
+  for (const day of days) {
+    if (day.dayOfWeek < 0 || day.dayOfWeek > 6) throw new InvalidScheduleError("Día de la semana inválido.");
+    if (!Number.isInteger(day.openHour) || !Number.isInteger(day.closeHour) || day.openHour < 0 || day.closeHour > 23) {
+      throw new InvalidScheduleError("Las horas deben ser enteros entre 0 y 23.");
+    }
+    if (day.isOpen && day.openHour > day.closeHour) {
+      throw new InvalidScheduleError("La hora de apertura no puede ser después de la hora de cierre.");
+    }
+  }
+  const db = getDb();
+  const update = db.prepare(
+    "UPDATE weekly_schedule SET is_open = @isOpen, open_hour = @openHour, close_hour = @closeHour WHERE day_of_week = @dayOfWeek",
+  );
+  const run = db.transaction(() => {
+    for (const day of days) update.run({ ...day, isOpen: day.isOpen ? 1 : 0 });
+  });
+  run();
+}
+
+export function getScheduleOverride(date: string): ScheduleOverride | null {
+  const row = getDb().prepare("SELECT * FROM schedule_overrides WHERE date = ?").get(date);
+  return row ? rowToOverride(row as Parameters<typeof rowToOverride>[0]) : null;
+}
+
+export function listScheduleOverrides(): ScheduleOverride[] {
+  const rows = getDb().prepare("SELECT * FROM schedule_overrides ORDER BY date ASC").all();
+  return (rows as Parameters<typeof rowToOverride>[0][]).map(rowToOverride);
+}
+
+export function listScheduleOverridesInRange(from: string, to: string): ScheduleOverride[] {
+  const rows = getDb().prepare("SELECT * FROM schedule_overrides WHERE date BETWEEN ? AND ? ORDER BY date ASC").all(from, to);
+  return (rows as Parameters<typeof rowToOverride>[0][]).map(rowToOverride);
+}
+
+export function upsertScheduleOverride(input: {
+  date: string;
+  closed: boolean;
+  openHour: number | null;
+  closeHour: number | null;
+  note: string | null;
+}): ScheduleOverride {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) throw new InvalidScheduleError("Fecha inválida.");
+  if (!input.closed) {
+    if (input.openHour == null || input.closeHour == null) {
+      throw new InvalidScheduleError("Indica la hora de apertura y cierre, o marca el día como cerrado.");
+    }
+    if (
+      !Number.isInteger(input.openHour) ||
+      !Number.isInteger(input.closeHour) ||
+      input.openHour < 0 ||
+      input.closeHour > 23 ||
+      input.openHour > input.closeHour
+    ) {
+      throw new InvalidScheduleError("Las horas de la excepción no son válidas.");
+    }
+  }
+  getDb()
+    .prepare(
+      "INSERT INTO schedule_overrides (date, closed, open_hour, close_hour, note) VALUES (@date, @closed, @openHour, @closeHour, @note) " +
+        "ON CONFLICT(date) DO UPDATE SET closed = @closed, open_hour = @openHour, close_hour = @closeHour, note = @note",
+    )
+    .run({
+      date: input.date,
+      closed: input.closed ? 1 : 0,
+      openHour: input.closed ? null : input.openHour,
+      closeHour: input.closed ? null : input.closeHour,
+      note: input.note?.trim() || null,
+    });
+  return getScheduleOverride(input.date)!;
+}
+
+export function deleteScheduleOverride(date: string) {
+  getDb().prepare("DELETE FROM schedule_overrides WHERE date = ?").run(date);
+}
+
 // ---------- Appointments ----------
 
 function rowToAppointment(row: {
@@ -477,8 +611,10 @@ function assertValidSlot(dateKey: string, hour: string) {
   if (date.getTime() < startOfDay(new Date()).getTime()) {
     throw new InvalidAppointmentError("No se pueden agendar citas en fechas pasadas.");
   }
-  if (isSunday(date)) throw new InvalidAppointmentError("El taller no abre los domingos.");
-  if (!hoursForDate(date).map(formatHour).includes(hour)) {
+  const weekly = getWeeklySchedule();
+  const override = getScheduleOverride(dateKey);
+  const hours = computeHoursForDate(date, weekly, override ? { [dateKey]: override } : {});
+  if (!hours.map(formatHour).includes(hour)) {
     throw new InvalidAppointmentError("Ese horario no está disponible.");
   }
 }
@@ -639,6 +775,75 @@ export function createOrder(input: {
   });
   create();
   return { id, customer, phone, items: pricedItems, paymentMethod: input.paymentMethod, status: "pendiente", mpPaymentId: null, date };
+}
+
+/**
+ * Registra una venta de mostrador (trabajo o venta hecha en el taller sin
+ * pasar por el carrito en línea). A diferencia de createOrder, el precio de
+ * cada concepto lo da quien llama la función — solo llega hasta aquí después
+ * de pasar por requireAdmin() en la acción, así que confiar en él es seguro;
+ * permite además conceptos libres (mano de obra) que no existen en el
+ * catálogo de productos. Queda pagada de inmediato, ya que el dinero ya se
+ * cobró en el mostrador.
+ */
+export function createManualSale(input: {
+  customer: string;
+  phone: string;
+  items: { name: string; qty: number; price: number }[];
+}): Order {
+  const customer = input.customer.trim();
+  const phone = input.phone.trim();
+  if (!customer || !phone) throw new InvalidOrderError("Nombre y teléfono son obligatorios.");
+  if (input.items.length === 0) throw new InvalidOrderError("La venta no tiene conceptos.");
+
+  const db = getDb();
+  const id = `P-${nextSeq("orders", 3305)}`;
+  const getProductByName = db.prepare("SELECT stock FROM products WHERE name = ?");
+  const pricedItems: OrderItem[] = input.items.map((item) => {
+    const name = item.name.trim();
+    if (!name) throw new InvalidOrderError("Cada concepto necesita un nombre.");
+    if (!Number.isInteger(item.qty) || item.qty <= 0) {
+      throw new InvalidOrderError(`Cantidad inválida para "${name}".`);
+    }
+    if (!Number.isFinite(item.price) || item.price < 0) {
+      throw new InvalidOrderError(`Precio inválido para "${name}".`);
+    }
+    const product = getProductByName.get(name) as { stock: number } | undefined;
+    if (product && product.stock < item.qty) throw new InvalidOrderError(`No hay suficiente stock de "${name}".`);
+    return { name, price: item.price, qty: item.qty };
+  });
+  const total = pricedItems.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const date = new Date().toISOString().slice(0, 10);
+
+  const create = db.transaction(() => {
+    db.prepare(
+      "INSERT INTO orders (id, customer, phone, status, payment_method, date) VALUES (?, ?, ?, 'pagado', 'mostrador', ?)",
+    ).run(id, customer, phone, date);
+    const insertItem = db.prepare("INSERT INTO order_items (order_id, name, price, qty) VALUES (?, ?, ?, ?)");
+    // Solo descuenta stock si el concepto corresponde a un producto real del
+    // catálogo — un concepto libre (ej. mano de obra) no afecta inventario.
+    const decrementStock = db.prepare("UPDATE products SET stock = MAX(0, stock - ?) WHERE name = ?");
+    for (const item of pricedItems) {
+      insertItem.run(id, item.name, item.price, item.qty);
+      decrementStock.run(item.qty, item.name);
+    }
+    touchCustomer(db, customer, phone, total, date);
+  });
+  create();
+  return { id, customer, phone, items: pricedItems, paymentMethod: "mostrador", status: "pagado", mpPaymentId: null, date };
+}
+
+/** Pedidos dentro de un rango de fechas [from, to], para el corte de caja. */
+export function listOrdersInRange(from: string, to: string): Order[] {
+  const db = getDb();
+  const orderRows = db.prepare("SELECT * FROM orders WHERE date BETWEEN ? AND ? ORDER BY date ASC, created_at ASC").all(
+    from,
+    to,
+  ) as {
+    id: string; customer: string; phone: string; status: string; payment_method: string; mp_payment_id: string | null; date: string;
+  }[];
+  const itemStmt = db.prepare("SELECT name, price, qty FROM order_items WHERE order_id = ?");
+  return orderRows.map((row) => rowsToOrder(row, itemStmt.all(row.id) as { name: string; price: number; qty: number }[]));
 }
 
 export function updateOrderStatus(id: string, status: OrderStatus) {

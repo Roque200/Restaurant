@@ -14,7 +14,7 @@ export function RevenueChart({ data }: { data: number[] }) {
     <div className="relative">
       <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="h-48 w-full overflow-visible">
         {data.map((value, i) => {
-          const barHeight = (value / max) * height;
+          const barHeight = max > 0 ? (value / max) * height : 0;
           const isHover = hover === i;
           return (
             <motion.rect

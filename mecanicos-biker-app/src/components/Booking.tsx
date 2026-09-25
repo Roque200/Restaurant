@@ -5,13 +5,14 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   MONTHS_ES,
   WEEKDAYS_ES,
+  computeHoursForDate,
   formatHour,
   formatLongDate,
   formatSelectionSummary,
-  hoursForDate,
-  isSunday,
   isoDate,
   startOfDay,
+  type ScheduleOverride,
+  type WeeklyDaySchedule,
 } from "@/lib/booking";
 import { waLink } from "@/lib/whatsapp";
 import { getMonthAvailability, bookAppointment } from "@/lib/actions/appointments";
@@ -19,6 +20,18 @@ import { SERVICE_OPTIONS, OTHER_SERVICE_VALUE } from "@/lib/services";
 import { Reveal } from "./Reveal";
 
 type BookingResult = { id: string; url: string; qrDataUrl: string };
+
+// Horario de respaldo mientras se resuelve la primera consulta al servidor —
+// el administrador puede cambiarlo en cualquier momento desde el panel.
+const FALLBACK_WEEKLY_SCHEDULE: WeeklyDaySchedule[] = [
+  { dayOfWeek: 0, isOpen: false, openHour: 9, closeHour: 14 },
+  { dayOfWeek: 1, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 2, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 3, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 4, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 5, isOpen: true, openHour: 9, closeHour: 18 },
+  { dayOfWeek: 6, isOpen: true, openHour: 9, closeHour: 14 },
+];
 
 export function Booking() {
   const today = useMemo(() => startOfDay(new Date()), []);
@@ -29,6 +42,8 @@ export function Booking() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedHour, setSelectedHour] = useState<number | null>(null);
   const [busyByDate, setBusyByDate] = useState<Record<string, string[]>>({});
+  const [weekly, setWeekly] = useState<WeeklyDaySchedule[]>(FALLBACK_WEEKLY_SCHEDULE);
+  const [overrides, setOverrides] = useState<Record<string, ScheduleOverride>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<BookingResult | null>(null);
@@ -50,20 +65,30 @@ export function Booking() {
   const refreshAvailability = useCallback(() => {
     const from = isoDate(new Date(viewMonth.getFullYear(), viewMonth.getMonth(), 1));
     const to = isoDate(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 0));
-    return getMonthAvailability(from, to).then(setBusyByDate);
+    return getMonthAvailability(from, to).then(({ busy, weekly, overrides }) => {
+      setBusyByDate(busy);
+      setWeekly(weekly);
+      const overridesByDate: Record<string, ScheduleOverride> = {};
+      for (const o of overrides) overridesByDate[o.date] = o;
+      setOverrides(overridesByDate);
+    });
   }, [viewMonth]);
 
   useEffect(() => {
     refreshAvailability();
   }, [refreshAvailability]);
 
-  const slots = selectedDate ? hoursForDate(selectedDate) : [];
+  function hoursFor(date: Date) {
+    return computeHoursForDate(date, weekly, overrides);
+  }
+
+  const slots = selectedDate ? hoursFor(selectedDate) : [];
   const isSelectedToday = selectedDate?.getTime() === today.getTime();
   const nowHour = new Date().getHours();
   const busyForSelected = selectedDate ? (busyByDate[isoDate(selectedDate)] ?? []) : [];
 
   function dayHasFreeSlot(date: Date) {
-    const hours = hoursForDate(date);
+    const hours = hoursFor(date);
     if (hours.length === 0) return false;
     const isToday = date.getTime() === today.getTime();
     const busy = busyByDate[isoDate(date)] ?? [];
@@ -192,7 +217,7 @@ export function Booking() {
             <div className="grid grid-cols-7 gap-1">
               {days.map((date, i) => {
                 if (!date) return <span key={i} />;
-                const closed = isSunday(date);
+                const closed = hoursFor(date).length === 0;
                 const past = date.getTime() < today.getTime();
                 const hasFree = !closed && !past && dayHasFreeSlot(date);
                 const isToday = date.getTime() === today.getTime();

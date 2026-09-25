@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { StatCard } from "@/components/admin/StatCard";
 import { RevenueChart } from "@/components/admin/RevenueChart";
+import { CorteExport } from "@/components/admin/CorteExport";
 import { AppointmentStatusBadge, OrderStatusBadge } from "@/components/admin/StatusBadge";
 import { APPOINTMENT_STATUS_LABEL, ORDER_STATUS_LABEL, orderTotal } from "@/lib/admin-data";
 import { getDashboardStats } from "@/lib/db";
@@ -115,6 +116,8 @@ export default function AdminDashboardPage() {
           </ul>
         </div>
       </div>
+
+      <CorteExport />
     </div>
   );
 }

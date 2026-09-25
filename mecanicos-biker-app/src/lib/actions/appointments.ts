@@ -7,6 +7,8 @@ import {
   createAppointment as dbCreateAppointment,
   getAppointmentByToken as dbGetAppointmentByToken,
   getBusyHoursInRange,
+  getWeeklySchedule,
+  listScheduleOverridesInRange,
   checkInAppointment as dbCheckInAppointment,
   updateAppointmentStatus as dbUpdateAppointmentStatus,
   SlotTakenError,
@@ -23,7 +25,10 @@ async function siteUrl() {
 }
 
 export async function getMonthAvailability(from: string, to: string) {
-  return getBusyHoursInRange(from, to);
+  const busy = getBusyHoursInRange(from, to);
+  const weekly = getWeeklySchedule();
+  const overrides = listScheduleOverridesInRange(from, to);
+  return { busy, weekly, overrides };
 }
 
 export async function bookAppointment(input: {

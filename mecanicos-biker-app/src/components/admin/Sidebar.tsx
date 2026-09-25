@@ -60,6 +60,36 @@ const NAV = [
       </>
     ),
   },
+  {
+    href: "/admin/horarios",
+    label: "Horarios",
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M12 7v5l3.5 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    ),
+  },
+  {
+    href: "/admin/cotizador",
+    label: "Cotizador",
+    icon: (
+      <>
+        <rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M8.5 8h7M8.5 12h7M8.5 16h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </>
+    ),
+  },
+  {
+    href: "/admin/ventas",
+    label: "Venta de mostrador",
+    icon: (
+      <>
+        <path d="M3 7h18l-1.5 9.5a2 2 0 0 1-2 1.7H6.5a2 2 0 0 1-2-1.7L3 7z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+        <path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </>
+    ),
+  },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {

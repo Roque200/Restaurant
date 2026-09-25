@@ -1,6 +1,7 @@
 export type {
   AppointmentStatus,
   OrderStatus,
+  PaymentMethod,
   ProductCategory,
   Appointment,
   OrderItem,
@@ -8,6 +9,8 @@ export type {
   Product,
   Customer,
   RewardItem,
+  WeeklyDaySchedule,
+  ScheduleOverride,
 } from "@/lib/db";
 export { orderTotal } from "@/lib/pricing";
 export { REWARD_TIERS, getRewardTier } from "@/lib/rewards";
