@@ -651,6 +651,28 @@ export function createAppointment(input: {
   return { id, qrToken, customer, phone, service, date: input.date, hour: input.hour, status: "pendiente", checkedInAt: null, notes: null };
 }
 
+export function getAppointment(id: string): Appointment | null {
+  const row = getDb().prepare("SELECT * FROM appointments WHERE id = ?").get(id);
+  return row ? rowToAppointment(row as Parameters<typeof rowToAppointment>[0]) : null;
+}
+
+/** Mueve una cita a otra fecha/hora, respetando el mismo horario configurado que valida las citas nuevas. */
+export function rescheduleAppointment(id: string, date: string, hour: string): Appointment {
+  const db = getDb();
+  const current = getAppointment(id);
+  if (!current) throw new InvalidAppointmentError("La cita no existe.");
+  assertValidSlot(date, hour);
+  try {
+    db.prepare("UPDATE appointments SET date = ?, hour = ? WHERE id = ?").run(date, hour, id);
+  } catch (err) {
+    if (err instanceof Error && /UNIQUE constraint failed: appointments/.test(err.message)) {
+      throw new SlotTakenError("Ese horario ya fue tomado.");
+    }
+    throw err;
+  }
+  return getAppointment(id)!;
+}
+
 export class InvalidStatusError extends Error {}
 
 export function updateAppointmentStatus(id: string, status: AppointmentStatus) {

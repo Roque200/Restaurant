@@ -11,6 +11,7 @@ import {
   listScheduleOverridesInRange,
   checkInAppointment as dbCheckInAppointment,
   updateAppointmentStatus as dbUpdateAppointmentStatus,
+  rescheduleAppointment as dbRescheduleAppointment,
   SlotTakenError,
   InvalidAppointmentError,
   type AppointmentStatus,
@@ -73,4 +74,20 @@ export async function updateAppointmentStatus(id: string, status: AppointmentSta
   revalidatePath("/admin/citas");
   revalidatePath("/admin/dashboard");
   revalidatePath("/admin/clientes");
+}
+
+export async function rescheduleAppointment(id: string, date: string, hour: string) {
+  await requireAdmin();
+  try {
+    const appointment = dbRescheduleAppointment(id, date, hour);
+    revalidatePath("/admin/citas");
+    revalidatePath("/admin/horarios");
+    revalidatePath("/admin/dashboard");
+    return { ok: true as const, appointment };
+  } catch (err) {
+    if (err instanceof SlotTakenError || err instanceof InvalidAppointmentError) {
+      return { ok: false as const, error: err.message };
+    }
+    throw err;
+  }
 }

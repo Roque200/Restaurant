@@ -10,7 +10,6 @@ const TITLES: Record<string, { title: string; desc: string }> = {
   "/admin/clientes": { title: "Clientes", desc: "Historial y contacto de tus clientes" },
   "/admin/escanear": { title: "Escanear", desc: "Escanea el código QR de una cita para registrar la llegada" },
   "/admin/horarios": { title: "Horarios", desc: "Días y horas disponibles para agendar citas" },
-  "/admin/cotizador": { title: "Cotizador", desc: "Arma una cotización de piezas y envíala por WhatsApp" },
   "/admin/ventas": { title: "Venta de mostrador", desc: "Registra ventas y trabajos hechos en el taller" },
 };
 

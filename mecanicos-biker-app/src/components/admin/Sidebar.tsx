@@ -71,16 +71,6 @@ const NAV = [
     ),
   },
   {
-    href: "/admin/cotizador",
-    label: "Cotizador",
-    icon: (
-      <>
-        <rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" strokeWidth="1.6" />
-        <path d="M8.5 8h7M8.5 12h7M8.5 16h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      </>
-    ),
-  },
-  {
     href: "/admin/ventas",
     label: "Venta de mostrador",
     icon: (
